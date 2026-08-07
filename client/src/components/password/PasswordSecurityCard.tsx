@@ -11,8 +11,10 @@ import { PasswordStrengthIndicator } from './PasswordStrengthIndicator';
 import { RequirementChecklist } from './RequirementChecklist';
 import { SuggestionCard } from './SuggestionCard';
 import { ReuseWarning } from './ReuseWarning';
-import { ShieldCheck, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { ShieldCheck, ArrowRight, CheckCircle2, AlertOctagon } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import { usePasswordAnalyzer } from '../../hooks/usePasswordAnalyzer';
+import { PasswordAnalysisOutput } from '../../engine';
 
 export interface RequirementItem {
   label: string;
@@ -32,7 +34,7 @@ export interface PasswordSecurityCardStateProps {
 
 export interface PasswordSecurityCardProps {
   className?: string;
-  onContinue?: () => void;
+  onContinue?: (analysis?: PasswordAnalysisOutput | null) => void;
   stateProps?: PasswordSecurityCardStateProps;
 }
 
@@ -41,33 +43,55 @@ export const PasswordSecurityCard: React.FC<PasswordSecurityCardProps> = ({
   onContinue,
   stateProps,
 }) => {
-  const initialPassword = stateProps?.password !== undefined ? stateProps.password : 'P@ssw0rd2026!';
-  const [password, setPassword] = useState(initialPassword);
+  const isStaticMode = stateProps !== undefined;
+
+  // Real-time engine hook state
+  const { password, setPassword, analysis } = usePasswordAnalyzer({
+    initialPassword: stateProps?.password || '',
+  });
+
   const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     if (stateProps?.password !== undefined) {
       setPassword(stateProps.password);
     }
-  }, [stateProps?.password]);
+  }, [stateProps?.password, setPassword]);
 
-  const score = stateProps?.score !== undefined ? stateProps.score : 72;
-  const status = stateProps?.status || 'Strong';
-  const rules = stateProps?.rules || [
-    { label: 'At least 12 characters', completed: true },
-    { label: 'Uppercase letter', completed: true },
-    { label: 'Lowercase letter', completed: true },
-    { label: 'Number', completed: true },
-    { label: 'Special character (!@#$%)', completed: false },
-  ];
+  // Derived values (from static override or live engine)
+  const score = isStaticMode
+    ? (stateProps.score !== undefined ? stateProps.score : 0)
+    : (analysis?.score ?? 0);
 
-  const suggestion = stateProps?.suggestion !== undefined ? stateProps.suggestion : 'Add one special character (!@#$%) to improve your password strength score.';
-  const expectedScoreBoost = stateProps?.expectedScoreBoost;
-  const reuseWarning = stateProps?.reuseWarning || {
-    isVisible: false,
-    message: 'Previously used password detected. Avoid reusing passwords across multiple accounts.',
-  };
-  const successMessage = stateProps?.successMessage;
+  const status = isStaticMode
+    ? (stateProps.status || 'Neutral')
+    : (analysis?.status ?? (password ? 'Weak' : 'Neutral'));
+
+  const rules = isStaticMode
+    ? (stateProps.rules || [])
+    : (analysis?.rules?.map((r) => ({ label: r.label, completed: r.passed })) || []);
+
+  const suggestion = isStaticMode
+    ? stateProps.suggestion
+    : (analysis?.suggestion ? analysis.suggestion.message : null);
+
+  const expectedScoreBoost = isStaticMode
+    ? stateProps.expectedScoreBoost
+    : analysis?.suggestion?.expectedScore;
+
+  const reuseWarning = isStaticMode
+    ? stateProps.reuseWarning
+    : (analysis?.reuse?.reused
+        ? { isVisible: true, message: analysis.reuse.message }
+        : { isVisible: false, message: '' });
+
+  const commonWarning = !isStaticMode && analysis?.commonPassword?.isCommon
+    ? analysis.commonPassword.message
+    : null;
+
+  const successMessage = isStaticMode
+    ? stateProps.successMessage
+    : (score === 100 ? 'Excellent password! Meets all enterprise security standards.' : null);
 
   return (
     <Card className={cn('w-full max-w-full sm:max-w-md md:max-w-lg mx-auto p-4 sm:p-6 space-y-4 sm:space-y-5 bg-slate-900 border-slate-800 shadow-xl overflow-hidden', className)}>
@@ -113,7 +137,7 @@ export const PasswordSecurityCard: React.FC<PasswordSecurityCardProps> = ({
         {/* Molecule 4: RequirementChecklist */}
         <RequirementChecklist rules={rules} />
 
-        {/* Success Banner if Excellent */}
+        {/* Success Banner if 100% score */}
         {successMessage && (
           <Alert variant="success" icon={<CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />}>
             <AlertTitle className="text-xs font-semibold text-emerald-300 mb-0.5">
@@ -121,6 +145,18 @@ export const PasswordSecurityCard: React.FC<PasswordSecurityCardProps> = ({
             </AlertTitle>
             <AlertDescription className="text-xs text-emerald-200/80">
               {successMessage}
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Common Breach Warning */}
+        {commonWarning && (
+          <Alert variant="error" icon={<AlertOctagon className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />}>
+            <AlertTitle className="text-xs font-semibold text-red-300 mb-0.5">
+              Common Password Flagged
+            </AlertTitle>
+            <AlertDescription className="text-xs text-red-200/80">
+              {commonWarning}
             </AlertDescription>
           </Alert>
         )}
@@ -151,7 +187,7 @@ export const PasswordSecurityCard: React.FC<PasswordSecurityCardProps> = ({
           variant="default"
           size="lg"
           className="w-full h-11 sm:h-12 text-sm sm:text-base font-semibold shadow-md gap-2 active:scale-[0.98] transition-transform"
-          onClick={onContinue}
+          onClick={() => onContinue?.(analysis)}
           rightIcon={<ArrowRight className="w-4 h-4" />}
         >
           Continue
