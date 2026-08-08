@@ -1,0 +1,111 @@
+name: Bug Report
+description: Create a report to help us reproduce and fix a bug in PassGuard.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### ⚠️ Important Security Notice
+        **Do NOT include real passwords, credentials, API keys, tokens, or personal secrets in this report.**
+        If you suspect you have found a **security vulnerability**, do NOT open a public GitHub issue. Please review our [Security Policy](https://github.com/vathsa1820/PassGuard/blob/main/SECURITY.md) to submit a private vulnerability report.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: A clear and concise description of what the bug is.
+      placeholder: Tell us what happened...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: A clear and concise description of what you expected to happen.
+      placeholder: What should have happened...
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction-steps
+    attributes:
+      label: Steps to Reproduce
+      description: Provide clear, step-by-step instructions to reproduce the issue.
+      placeholder: |
+        1. Render `<PasswordSecurityCard />`
+        2. Type '...' into input field
+        3. See error '...'
+    validations:
+      required: true
+
+  - type: input
+    id: passguard-version
+    attributes:
+      label: PassGuard Version
+      description: What version of `@passguard/client` are you using? (e.g. 1.0.0, commit hash)
+      placeholder: 1.0.0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Affected Component
+      description: Which PassGuard component or module is affected?
+      options:
+        - PasswordSecurityCard
+        - PasswordInput
+        - PasswordHealthScore
+        - PasswordStrengthIndicator
+        - RequirementChecklist
+        - SuggestionCard
+        - ReuseWarning
+        - Engine (PasswordAnalyzer / Sub-engines)
+        - React Hooks (usePasswordAnalysis, etc.)
+        - Other / Unknown
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment Details
+      description: Please provide details about your runtime environment.
+      placeholder: |
+        - Operating System: macOS 14 / Windows 11 / Ubuntu 22.04
+        - Browser & Version: Chrome 122 / Firefox 123 / Safari 17
+        - React Version: 18.2.0 / 19.0.0
+        - Bundler / Framework: Vite / Next.js 14 / Webpack
+    validations:
+      required: true
+
+  - type: dropdown
+    id: consistency
+    attributes:
+      label: Can you reproduce this issue consistently?
+      options:
+        - Yes, every time
+        - Intermittently
+        - Haven't tried reproducing
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Add any other context, code snippets (with synthetic passwords only), or screenshots about the problem here.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: security-check
+    attributes:
+      label: Security & Privacy Acknowledgment
+      options:
+        - label: I confirm that I have NOT included real passwords, credentials, API keys, or secret tokens in this report.
+          required: true
+        - label: I confirm that this report does NOT describe a zero-day security vulnerability (which should be submitted privately via SECURITY.md).
+          required: true

@@ -1,11 +1,10 @@
-import { useMemo } from 'react';
-import { calculateEntropy } from '../utils/entropyCalculator';
-import { calculateScore } from '../utils/scoreCalculator';
+import { usePasswordAnalysis } from './usePasswordAnalysis';
 
 export function usePasswordStrength(password: string) {
-  return useMemo(() => {
-    const entropy = calculateEntropy(password);
-    const score = calculateScore(password, entropy);
-    return { entropy, score };
-  }, [password]);
+  const analysis = usePasswordAnalysis(password);
+  return {
+    entropy: analysis.entropy,
+    score: analysis.score,
+  };
 }
+

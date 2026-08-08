@@ -4,7 +4,7 @@ import { cn } from '../../lib/utils';
 
 /**
  * PasswordStrengthIndicator Component
- * Smoothly interpolates progress fill width and subtle glow accents.
+ * Smoothly interpolates progress fill width and subtle glow accents with accessible ARIA progressbar semantics.
  */
 
 export interface PasswordStrengthIndicatorProps {
@@ -29,9 +29,11 @@ export const PasswordStrengthIndicator: React.FC<PasswordStrengthIndicatorProps>
     <div className={cn('w-full space-y-1', className)}>
       <div
         role="progressbar"
+        aria-label="Password security score"
         aria-valuenow={normalizedScore}
         aria-valuemin={0}
         aria-valuemax={100}
+        aria-valuetext={`Password security score: ${normalizedScore} out of 100`}
         className="w-full bg-slate-800/80 h-2 rounded-full overflow-hidden p-0.5"
       >
         <motion.div

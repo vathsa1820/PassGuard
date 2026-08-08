@@ -5,7 +5,7 @@ import { cn } from '../../lib/utils';
 
 /**
  * RequirementChecklist Component
- * Responsive 1-col on mobile -> 2-col on tablet grid layout with text wrapping safeguards.
+ * Responsive 1-col on mobile -> 2-col on tablet grid layout with text wrapping safeguards and WCAG accessibility text.
  */
 
 export interface RequirementRule {
@@ -45,6 +45,7 @@ export const RequirementChecklist: React.FC<RequirementChecklistProps> = ({
               <motion.div
                 animate={{ scale: rule.completed ? [1, 1.15, 1] : 1 }}
                 transition={{ duration: 0.2 }}
+                aria-hidden="true"
                 className={cn(
                   'w-4 h-4 rounded-full flex items-center justify-center shrink-0 text-[10px] transition-colors',
                   rule.completed
@@ -55,6 +56,9 @@ export const RequirementChecklist: React.FC<RequirementChecklistProps> = ({
                 {rule.completed ? <Check className="w-2.5 h-2.5" /> : <X className="w-2.5 h-2.5" />}
               </motion.div>
               <span className="truncate min-w-0">{rule.label}</span>
+              <span className="sr-only">
+                {rule.completed ? `${rule.label} — requirement met` : `${rule.label} — requirement not met`}
+              </span>
             </motion.li>
           ))}
         </AnimatePresence>

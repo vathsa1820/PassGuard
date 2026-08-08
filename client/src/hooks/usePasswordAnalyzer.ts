@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { PasswordAnalysisOutput, analyzePassword } from '../engine';
+import { useState } from 'react';
+import { usePasswordAnalysis } from './usePasswordAnalysis';
 
 export interface UsePasswordAnalyzerOptions {
   initialPassword?: string;
@@ -11,29 +11,13 @@ export interface UsePasswordAnalyzerOptions {
  */
 export function usePasswordAnalyzer(options: UsePasswordAnalyzerOptions = {}) {
   const [password, setPassword] = useState(options.initialPassword || '');
-  const [analysis, setAnalysis] = useState<PasswordAnalysisOutput | null>(null);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-
-  useEffect(() => {
-    let isCurrent = true;
-    setIsAnalyzing(true);
-
-    analyzePassword(password).then((result) => {
-      if (isCurrent) {
-        setAnalysis(result);
-        setIsAnalyzing(false);
-      }
-    });
-
-    return () => {
-      isCurrent = false;
-    };
-  }, [password]);
+  const analysis = usePasswordAnalysis(password);
 
   return {
     password,
     setPassword,
     analysis,
-    isAnalyzing,
+    isAnalyzing: false,
   };
 }
+

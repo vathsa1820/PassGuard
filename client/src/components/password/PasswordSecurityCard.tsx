@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Divider } from '../ui/Divider';
@@ -13,8 +13,10 @@ import { SuggestionCard } from './SuggestionCard';
 import { ReuseWarning } from './ReuseWarning';
 import { ShieldCheck, ArrowRight, CheckCircle2, AlertOctagon } from 'lucide-react';
 import { cn } from '../../lib/utils';
-import { usePasswordAnalyzer } from '../../hooks/usePasswordAnalyzer';
+import { usePasswordAnalysis } from '../../hooks/usePasswordAnalysis';
 import { PasswordAnalysisOutput } from '../../engine';
+
+import { PasswordPolicy } from '../../config';
 
 export interface RequirementItem {
   label: string;
@@ -34,64 +36,93 @@ export interface PasswordSecurityCardStateProps {
 
 export interface PasswordSecurityCardProps {
   className?: string;
+  value?: string;
+  onChange?: (password: string) => void;
   onContinue?: (analysis?: PasswordAnalysisOutput | null) => void;
   stateProps?: PasswordSecurityCardStateProps;
+  policy?: Partial<PasswordPolicy> | PasswordPolicy;
 }
 
-export const PasswordSecurityCard: React.FC<PasswordSecurityCardProps> = ({
+export const PasswordSecurityCard: React.FC<PasswordSecurityCardProps> = React.memo(({
   className,
+  value,
+  onChange,
   onContinue,
   stateProps,
+  policy,
 }) => {
   const isStaticMode = stateProps !== undefined;
 
-  // Real-time engine hook state
-  const { password, setPassword, analysis } = usePasswordAnalyzer({
-    initialPassword: stateProps?.password || '',
-  });
-
+  const [internalPassword, setInternalPassword] = useState(stateProps?.password || '');
   const [showPassword, setShowPassword] = useState(false);
+
+  const password = value !== undefined ? value : internalPassword;
 
   useEffect(() => {
     if (stateProps?.password !== undefined) {
-      setPassword(stateProps.password);
+      setInternalPassword(stateProps.password);
     }
-  }, [stateProps?.password, setPassword]);
+  }, [stateProps?.password]);
 
-  // Derived values (from static override or live engine)
+  const handlePasswordChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const nextValue = e.target.value;
+    if (value === undefined) {
+      setInternalPassword(nextValue);
+    }
+    onChange?.(nextValue);
+  }, [value, onChange]);
+
+  const togglePasswordVisibility = useCallback(() => {
+    setShowPassword((prev) => !prev);
+  }, []);
+
+  // Real-time analysis hook driven by PassGuard Intelligence Engine & Policy
+  const liveAnalysis = usePasswordAnalysis(isStaticMode ? (stateProps.password || '') : password, policy);
+
+  // Memoize derived values for efficient rendering
   const score = isStaticMode
     ? (stateProps.score !== undefined ? stateProps.score : 0)
-    : (analysis?.score ?? 0);
+    : (password ? liveAnalysis.score : 0);
 
   const status = isStaticMode
     ? (stateProps.status || 'Neutral')
-    : (analysis?.status ?? (password ? 'Weak' : 'Neutral'));
+    : (password ? liveAnalysis.status : 'Neutral');
 
-  const rules = isStaticMode
-    ? (stateProps.rules || [])
-    : (analysis?.rules?.map((r) => ({ label: r.label, completed: r.passed })) || []);
+  const rules: RequirementItem[] = useMemo(() => {
+    if (isStaticMode) {
+      return stateProps.rules || [];
+    }
+    return liveAnalysis.rules.map((r) => ({ label: r.label, completed: r.passed }));
+  }, [isStaticMode, stateProps?.rules, liveAnalysis.rules]);
 
   const suggestion = isStaticMode
     ? stateProps.suggestion
-    : (analysis?.suggestion ? analysis.suggestion.message : null);
+    : (password ? liveAnalysis.suggestion.message : null);
 
   const expectedScoreBoost = isStaticMode
     ? stateProps.expectedScoreBoost
-    : analysis?.suggestion?.expectedScore;
+    : (password ? liveAnalysis.suggestion.expectedScore : undefined);
 
-  const reuseWarning = isStaticMode
-    ? stateProps.reuseWarning
-    : (analysis?.reuse?.reused
-        ? { isVisible: true, message: analysis.reuse.message }
-        : { isVisible: false, message: '' });
+  const reuseWarning = useMemo(() => {
+    if (isStaticMode) {
+      return stateProps.reuseWarning;
+    }
+    return liveAnalysis.reuse.reused
+      ? { isVisible: true, message: liveAnalysis.reuse.message }
+      : { isVisible: false, message: '' };
+  }, [isStaticMode, stateProps?.reuseWarning, liveAnalysis.reuse]);
 
-  const commonWarning = !isStaticMode && analysis?.commonPassword?.isCommon
-    ? analysis.commonPassword.message
-    : null;
+  const commonWarning = useMemo(() => {
+    return !isStaticMode && password && liveAnalysis.commonPassword.isCommon
+      ? liveAnalysis.commonPassword.message
+      : null;
+  }, [isStaticMode, password, liveAnalysis.commonPassword]);
 
   const successMessage = isStaticMode
     ? stateProps.successMessage
-    : (score === 100 ? 'Excellent password! Meets all enterprise security standards.' : null);
+    : (password && score === 100 ? 'Excellent password! Meets all enterprise security standards.' : null);
+
+  const analysis = isStaticMode ? null : liveAnalysis;
 
   return (
     <Card className={cn('w-full max-w-full sm:max-w-md md:max-w-lg mx-auto p-4 sm:p-6 space-y-4 sm:space-y-5 bg-slate-900 border-slate-800 shadow-xl overflow-hidden', className)}>
@@ -99,7 +130,7 @@ export const PasswordSecurityCard: React.FC<PasswordSecurityCardProps> = ({
       <CardHeader className="space-y-1 px-0 pt-0 pb-3 sm:pb-4 border-b border-slate-800/80">
         <div className="flex items-center gap-2.5 sm:gap-3">
           <div className="p-2 sm:p-2.5 rounded-lg bg-blue-950/60 border border-blue-800/50 text-blue-400 shrink-0">
-            <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6" />
+            <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6" aria-hidden="true" />
           </div>
           <div className="min-w-0">
             <CardTitle className="text-lg sm:text-xl font-bold text-slate-100 truncate">
@@ -121,9 +152,9 @@ export const PasswordSecurityCard: React.FC<PasswordSecurityCardProps> = ({
           <PasswordInput
             id="passguard-input"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={handlePasswordChange}
             showPassword={showPassword}
-            toggleVisibility={() => setShowPassword(!showPassword)}
+            toggleVisibility={togglePasswordVisibility}
             placeholder="Enter password..."
           />
         </div>
@@ -195,5 +226,5 @@ export const PasswordSecurityCard: React.FC<PasswordSecurityCardProps> = ({
       </CardFooter>
     </Card>
   );
-};
+});
 PasswordSecurityCard.displayName = 'PasswordSecurityCard';

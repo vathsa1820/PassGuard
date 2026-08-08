@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PassGuard HTML / Traditional Web Page Integration (Future Roadmap)</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 40px 20px;
+        background-color: #0b0f19;
+        color: #f3f4f6;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #111827;
+        border: 1px solid #1f2937;
+        border-radius: 12px;
+        padding: 32px;
+      }
+      h1 {
+        font-size: 24px;
+        margin: 0 0 12px 0;
+        color: #ffffff;
+      }
+      .notice-box {
+        background-color: #1e1b4b;
+        border: 1px solid #4338ca;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 24px;
+      }
+      .notice-title {
+        font-weight: bold;
+        color: #818cf8;
+        margin-bottom: 6px;
+      }
+      code {
+        background-color: #1f2937;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-family: monospace;
+        color: #f472b6;
+      }
+      .form-group {
+        margin-bottom: 20px;
+      }
+      label {
+        display: block;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 6px;
+      }
+      input {
+        width: 100%;
+        padding: 10px 14px;
+        border-radius: 6px;
+        border: 1px solid #374151;
+        background-color: #1f2937;
+        color: #ffffff;
+        box-sizing: border-box;
+      }
+      .placeholder-card {
+        border: 2px dashed #374151;
+        border-radius: 8px;
+        padding: 24px;
+        text-align: center;
+        color: #9ca3af;
+        background-color: #0d1322;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>HTML / Traditional Web Integration Demo</h1>
+
+      <div class="notice-box">
+        <div class="notice-title">ℹ Architecture & Distribution Notice</div>
+        <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #d1d5db;">
+          PassGuard is currently distributed as an open-source React component library (<code>@vatza/passguard</code>) for React and Next.js applications.<br><br>
+          A standalone UMD/CDN script bundle for direct embedding via <code>&lt;script src="https://cdn.passguard.io/passguard.min.js"&gt;&lt;/script&gt;</code> is currently on our product roadmap.
+        </p>
+      </div>
+
+      <form onsubmit="event.preventDefault(); alert('PassGuard HTML integration mockup submit');">
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" placeholder="user@example.com" required />
+        </div>
+
+        <div class="form-group">
+          <label>Password (PassGuard Embedded Target)</label>
+          <div id="passguard-security-card-mount" class="placeholder-card">
+            <p style="margin: 0 0 8px 0; font-weight: 600; color: #e5e7eb;">
+              [PassGuard Security Component Mount Point]
+            </p>
+            <p style="margin: 0; font-size: 13px;">
+              In React/Next.js applications, <code>&lt;PasswordSecurityCard policy={policy} /&gt;</code> mounts here automatically.
+            </p>
+          </div>
+        </div>
+
+        <button type="submit" style="width: 100%; padding: 12px; border-radius: 6px; border: none; background-color: #2563eb; color: white; font-weight: bold; cursor: pointer;">
+          Submit Form
+        </button>
+      </form>
+    </div>
+  </body>
+</html>

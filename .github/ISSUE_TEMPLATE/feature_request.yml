@@ -1,0 +1,67 @@
+name: Feature Request
+description: Propose a new feature or enhancement for PassGuard.
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting a feature! Please provide details to help maintainers understand the problem and user value.
+        *Note: Feature requests are evaluated based on PassGuard's zero-knowledge security and privacy principles.*
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Description
+      description: What problem would this feature solve? Is your feature request related to a specific limitation or user experience pain point?
+      placeholder: A clear description of the problem...
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed Solution
+      description: What would you like PassGuard to do? Describe the proposed API, component prop, policy flag, or UI enhancement.
+      placeholder: I would like PassGuard to...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: What alternative solutions or workarounds have you considered?
+      placeholder: Describe any alternatives...
+    validations:
+      required: false
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Target Use Case
+      description: Describe the target user journey or enterprise application scenario.
+      placeholder: Useful for signup forms requiring...
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: security-implications
+    attributes:
+      label: Security & Privacy Impact Assessment
+      description: Does this proposed feature modify any of the following boundaries?
+      options:
+        - label: Password handling or string representation in memory
+        - label: Storage behavior (e.g. localStorage hash caching)
+        - label: Network communication (PassGuard maintains a 100% zero-network policy)
+        - label: Authentication or server-side hashing boundaries
+        - label: Cryptographic functions (WebCrypto API usage)
+        - label: User privacy or data isolation
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Add any mockups, design ideas, or reference implementations here.
+    validations:
+      required: false

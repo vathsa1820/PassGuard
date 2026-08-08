@@ -6,3 +6,5 @@ export * from './common-passwords';
 export * from './reuse';
 export * from './suggestions';
 export * from './analyzer';
+export * from '../config';
+

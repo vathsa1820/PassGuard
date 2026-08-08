@@ -6,7 +6,7 @@ import { cn } from '../../lib/utils';
 
 /**
  * PasswordInput Component
- * Touch-friendly input (44px target on mobile) with password visibility toggle.
+ * Touch-friendly input (44px target on mobile) with accessible password visibility toggle.
  */
 
 export interface PasswordInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -45,8 +45,9 @@ export const PasswordInput: React.FC<PasswordInputProps> = ({
       onChange={onChange}
       placeholder={placeholder}
       disabled={disabled}
+      autoComplete="new-password"
       className={cn('h-11 text-sm sm:text-base pr-11', className)}
-      startIcon={<Lock className="w-4 h-4 text-slate-400" />}
+      startIcon={<Lock className="w-4 h-4 text-slate-400" aria-hidden="true" />}
       endIcon={
         <IconButton
           type="button"
@@ -54,13 +55,14 @@ export const PasswordInput: React.FC<PasswordInputProps> = ({
           size="sm"
           disabled={disabled}
           aria-label={isVisible ? 'Hide password' : 'Show password'}
+          aria-pressed={isVisible}
           onClick={handleToggle}
           className="w-9 h-9 sm:w-10 sm:h-10 hover:bg-slate-800/80 active:scale-95"
           icon={
             isVisible ? (
-              <EyeOff className="w-4 h-4 text-slate-400 hover:text-slate-200 transition-colors" />
+              <EyeOff className="w-4 h-4 text-slate-400 hover:text-slate-200 transition-colors" aria-hidden="true" />
             ) : (
-              <Eye className="w-4 h-4 text-slate-400 hover:text-slate-200 transition-colors" />
+              <Eye className="w-4 h-4 text-slate-400 hover:text-slate-200 transition-colors" aria-hidden="true" />
             )
           }
         />

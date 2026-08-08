@@ -6,7 +6,7 @@ import { cn } from '../../lib/utils';
 
 /**
  * PasswordHealthScore Component
- * Renders animated numeric counter (0 -> score) and smooth badge layout transition.
+ * Renders animated numeric counter (0 -> score) and smooth badge layout transition with screen-reader live updates.
  */
 
 export interface PasswordHealthScoreProps {
@@ -79,6 +79,11 @@ export const PasswordHealthScore: React.FC<PasswordHealthScoreProps> = ({
           </Badge>
         </motion.div>
       </AnimatePresence>
+
+      {/* Screen-Reader Polite Announcement */}
+      <span className="sr-only" aria-live="polite" aria-atomic="true">
+        Password security score: {score} out of 100, status: {status}.
+      </span>
     </div>
   );
 };

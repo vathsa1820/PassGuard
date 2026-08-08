@@ -26,13 +26,14 @@ export function detectRepeatedChars(password: string, maxConsecutive = 3): Patte
 /**
  * Detects repeated words or substrings (e.g. "passpass", "adminadmin").
  */
-export function detectRepeatedWords(password: string): PatternDetectionResult {
+export function detectRepeatedWords(password: string, maxWordLen = 32): PatternDetectionResult {
   if (!password || password.length < 4) {
     return { type: 'repeated-words', detected: false, message: 'No repeated words detected.' };
   }
 
   const lower = password.toLowerCase();
-  for (let len = 2; len <= Math.floor(lower.length / 2); len++) {
+  const maxLen = Math.min(maxWordLen, Math.floor(lower.length / 2));
+  for (let len = 2; len <= maxLen; len++) {
     for (let i = 0; i <= lower.length - len * 2; i++) {
       const sub1 = lower.substring(i, i + len);
       const sub2 = lower.substring(i + len, i + len * 2);

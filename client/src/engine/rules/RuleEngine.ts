@@ -1,23 +1,35 @@
 import { RuleResult, RuleDefinition } from './types';
-import { defaultPasswordRules } from './passwordRules';
+import { defaultPasswordRules, createRulesFromPolicy } from './passwordRules';
+import { PasswordPolicy, resolvePasswordPolicy, defaultPasswordPolicy } from '../../config';
 
 /**
  * RuleEngine Class
  * Modular, pure rule execution engine.
- * Takes a password string and evaluates it against rules without state side-effects.
+ * Consumes configurable PasswordPolicy to dynamically evaluate password requirements.
  */
 export class RuleEngine {
+  private policy: PasswordPolicy;
   private rules: RuleDefinition[];
 
-  constructor(rules: RuleDefinition[] = defaultPasswordRules) {
-    this.rules = rules;
+  constructor(policyOrRules?: Partial<PasswordPolicy> | PasswordPolicy | RuleDefinition[]) {
+    if (Array.isArray(policyOrRules)) {
+      this.policy = defaultPasswordPolicy;
+      this.rules = policyOrRules;
+    } else {
+      this.policy = resolvePasswordPolicy(policyOrRules);
+      this.rules = createRulesFromPolicy(this.policy);
+    }
   }
 
   /**
-   * Evaluates all configured rules against the password input string.
+   * Evaluates all active policy rules against the password input string.
    */
-  public evaluate(password: string): RuleResult[] {
-    return this.rules.map((rule) => {
+  public evaluate(password: string, policyOverride?: Partial<PasswordPolicy> | PasswordPolicy): RuleResult[] {
+    const activeRules = policyOverride
+      ? createRulesFromPolicy(resolvePasswordPolicy(policyOverride))
+      : this.rules;
+
+    return activeRules.map((rule) => {
       const passed = rule.validator(password);
       return {
         id: rule.id,
@@ -29,6 +41,13 @@ export class RuleEngine {
   }
 
   /**
+   * Returns the current active policy configuration.
+   */
+  public getPolicy(): PasswordPolicy {
+    return this.policy;
+  }
+
+  /**
    * Extends the engine with custom user rules.
    */
   public addRule(rule: RuleDefinition): void {
@@ -37,12 +56,24 @@ export class RuleEngine {
 }
 
 /**
- * Pure helper function for immediate rule evaluation.
+ * Helper function for immediate rule analysis using a PasswordPolicy.
+ */
+export function analyzeRules(
+  password: string,
+  policy: Partial<PasswordPolicy> | PasswordPolicy = defaultPasswordPolicy
+): RuleResult[] {
+  const engine = new RuleEngine(policy);
+  return engine.evaluate(password);
+}
+
+/**
+ * Pure helper function for backward-compatible rule evaluation.
  */
 export function evaluateRules(
   password: string,
-  rules: RuleDefinition[] = defaultPasswordRules
+  rulesOrPolicy: RuleDefinition[] | Partial<PasswordPolicy> | PasswordPolicy = defaultPasswordPolicy
 ): RuleResult[] {
-  const engine = new RuleEngine(rules);
+  const engine = new RuleEngine(rulesOrPolicy as any);
   return engine.evaluate(password);
 }
+

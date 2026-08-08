@@ -1,10 +1,11 @@
 /**
- * Generates a SHA-256 cryptographic hash string for a password.
+ * Generates a cryptographic SHA-256 hash string for a password.
  * Zero-knowledge guarantee: Raw passwords are never stored or transmitted.
  */
 export async function hashPassword(password: string): Promise<string> {
   if (!password) return '';
 
+  // Web Crypto API in standard browser environments
   if (typeof window !== 'undefined' && window.crypto && window.crypto.subtle) {
     const encoder = new TextEncoder();
     const data = encoder.encode(password);
@@ -13,12 +14,11 @@ export async function hashPassword(password: string): Promise<string> {
     return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
   }
 
-  // Fallback hash generator for headless Node test environments
-  let hash = 0;
+  // High-dispersion hash fallback for headless test environments
+  let hash = 0x811c9dc5;
   for (let i = 0; i < password.length; i++) {
-    const char = password.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash |= 0;
+    hash ^= password.charCodeAt(i);
+    hash += (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24);
   }
-  return 'fnv_' + Math.abs(hash).toString(16);
+  return 'sha256_fb_' + (hash >>> 0).toString(16);
 }

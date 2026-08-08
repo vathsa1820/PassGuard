@@ -1,0 +1,44 @@
+name: Documentation Issue
+description: Report an issue or suggest an improvement for PassGuard documentation.
+title: "[Docs]: "
+labels: ["documentation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for helping improve PassGuard documentation!
+
+  - type: input
+    id: doc-location
+    attributes:
+      label: Documentation Location
+      description: Which page, file, or URL contains the issue? (e.g., README.md, docs/configuration.md, docs/api-reference.md)
+      placeholder: docs/configuration.md
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Description of the Issue
+      description: What is incorrect, unclear, missing, outdated, or broken?
+      placeholder: Describe the documentation problem...
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggested-improvement
+    attributes:
+      label: Suggested Improvement
+      description: How should the documentation be updated or improved?
+      placeholder: Provide suggested phrasing, corrections, or code snippets...
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Add any links, screenshots, or extra context here.
+    validations:
+      required: false

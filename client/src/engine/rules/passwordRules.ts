@@ -178,3 +178,124 @@ export const defaultPasswordRules: RuleDefinition[] = [
     successMessage: 'No common keyboard row patterns.',
   },
 ];
+
+/**
+ * Dynamically builds a set of RuleDefinitions according to the active PasswordPolicy.
+ */
+export function createRulesFromPolicy(policy: import('../../config').PasswordPolicy): RuleDefinition[] {
+  const rules: RuleDefinition[] = [];
+
+  // Minimum Length Rule
+  if (policy.minLength > 0) {
+    rules.push({
+      id: 'min-length',
+      label: `At least ${policy.minLength} characters`,
+      validator: (p) => hasMinLength(p, policy.minLength),
+      failureMessage: `Password must be at least ${policy.minLength} characters long.`,
+      successMessage: 'Password meets length requirement.',
+    });
+  }
+
+  // Maximum Length Rule
+  if (policy.maxLength && policy.maxLength > 0) {
+    rules.push({
+      id: 'max-length',
+      label: `Maximum ${policy.maxLength} characters`,
+      validator: (p) => p.length <= policy.maxLength,
+      failureMessage: `Password must not exceed ${policy.maxLength} characters.`,
+      successMessage: 'Password length is within allowed maximum.',
+    });
+  }
+
+  // Casing Rules
+  if (policy.requireUppercase) {
+    rules.push({
+      id: 'uppercase',
+      label: 'Uppercase letter',
+      validator: hasUppercase,
+      failureMessage: 'Include at least one uppercase letter (A-Z).',
+      successMessage: 'Contains uppercase character.',
+    });
+  }
+
+  if (policy.requireLowercase) {
+    rules.push({
+      id: 'lowercase',
+      label: 'Lowercase letter',
+      validator: hasLowercase,
+      failureMessage: 'Include at least one lowercase letter (a-z).',
+      successMessage: 'Contains lowercase character.',
+    });
+  }
+
+  // Character Type Rules
+  if (policy.requireNumber) {
+    rules.push({
+      id: 'number',
+      label: 'Number',
+      validator: hasNumber,
+      failureMessage: 'Include at least one number (0-9).',
+      successMessage: 'Contains numeric character.',
+    });
+  }
+
+  if (policy.requireSymbol) {
+    rules.push({
+      id: 'special-char',
+      label: 'Special character',
+      validator: hasSpecialChar,
+      failureMessage: 'Include at least one special character (!@#$%^&*).',
+      successMessage: 'Contains special symbol.',
+    });
+  }
+
+  // Whitespace Rule
+  rules.push({
+    id: 'no-whitespace',
+    label: 'No leading/trailing spaces',
+    validator: hasNoLeadingTrailingWhitespace,
+    failureMessage: 'Password must not start or end with spaces.',
+    successMessage: 'No leading or trailing spaces.',
+  });
+
+  // Pattern Prevention Rules
+  if (policy.preventRepeatedCharacters) {
+    rules.push({
+      id: 'no-repeated-chars',
+      label: 'No repeated characters',
+      validator: (p) => hasNoRepeatedChars(p, 3),
+      failureMessage: 'Avoid repeating characters 4+ times consecutively (e.g. "aaaa").',
+      successMessage: 'No excessive character repetition.',
+    });
+  }
+
+  if (policy.preventSequentialPatterns) {
+    rules.push({
+      id: 'no-sequential-numbers',
+      label: 'No sequential numbers',
+      validator: (p) => hasNoSequentialNumbers(p, 3),
+      failureMessage: 'Avoid sequential numbers like "123" or "987".',
+      successMessage: 'No sequential number patterns.',
+    });
+    rules.push({
+      id: 'no-sequential-letters',
+      label: 'No sequential letters',
+      validator: (p) => hasNoSequentialLetters(p, 3),
+      failureMessage: 'Avoid sequential letters like "abc" or "zyx".',
+      successMessage: 'No sequential letter patterns.',
+    });
+  }
+
+  if (policy.preventKeyboardPatterns) {
+    rules.push({
+      id: 'no-keyboard-patterns',
+      label: 'No common keyboard patterns',
+      validator: hasNoKeyboardPatterns,
+      failureMessage: 'Avoid keyboard sequence patterns like "qwerty" or "asdf".',
+      successMessage: 'No common keyboard row patterns.',
+    });
+  }
+
+  return rules;
+}
+

@@ -1,8 +1,32 @@
+# Dependencies
 node_modules/
+
+# Build and package outputs
 dist/
 build/
+*.tsbuildinfo
+
+# Environment files
 .env
-.env.local
+.env.*
+!.env.example
+
+# Test outputs & Playwright artifacts
+coverage/
+test-results/
+playwright-report/
+blob-report/
+tests/browser/screenshots/
+
+# IDE & Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files & logs
 *.log
 .DS_Store
-coverage/
+Thumbs.db
+Desktop.ini
+
