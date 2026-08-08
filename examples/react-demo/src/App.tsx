@@ -57,9 +57,10 @@ const PRESETS = [
 export default function App() {
   const [password, setPassword] = useState('');
   const [activePreset, setActivePreset] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<'card' | 'custom'>('card');
+  const [viewMode, setViewMode] = useState<'card' | 'custom'>('custom');
   const [showRawJson, setShowRawJson] = useState(false);
   const [liveAnalysis, setLiveAnalysis] = useState<PasswordAnalysis | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   // Hook instance for Mode 2: Granular Headless Integration
   const analyzer = usePasswordAnalyzer({
@@ -156,86 +157,135 @@ export default function App() {
       {/* MAIN DEMO GRID */}
       <div className="demo-grid">
         {/* LEFT COLUMN: INTERACTIVE COMPONENT DEMO */}
-        <section className="card-container" aria-label="Interactive Password Evaluation Area">
+        <section className="card-container left-panel" aria-label="Interactive Password Evaluation Area">
           {viewMode === 'card' ? (
-            <>
-              <h2 className="card-title">
-                <Lock size={20} style={{ color: '#38bdf8' }} />
-                Unified Security Card View
-              </h2>
-              <p style={{ fontSize: '13px', color: '#94a3b8', margin: '0 0 8px 0' }}>
-                Standard zero-knowledge component rendering live score, checklist, and guidance.
-              </p>
-              <PasswordSecurityCard
-                policy={demoPolicy}
-                value={password}
-                onChange={handlePasswordChange}
-                onContinue={(analysis) => {
-                  setLiveAnalysis(analysis || null);
-                }}
-              />
-            </>
+            <div className="panel-wrapper">
+              <div className="panel-header">
+                <h2 className="card-title">
+                  <Lock size={20} style={{ color: '#38bdf8' }} />
+                  Unified Security Card View
+                </h2>
+                <p className="panel-description">
+                  Standard zero-knowledge component rendering live score, checklist, and guidance.
+                </p>
+              </div>
+              <div className="card-surface">
+                <PasswordSecurityCard
+                  policy={demoPolicy}
+                  value={password}
+                  onChange={handlePasswordChange}
+                  onContinue={(analysis) => {
+                    setLiveAnalysis(analysis || null);
+                  }}
+                />
+              </div>
+            </div>
           ) : (
-            <>
-              <h2 className="card-title">
-                <Code size={20} style={{ color: '#38bdf8' }} />
-                Granular Component Composition
-              </h2>
-              <p style={{ fontSize: '13px', color: '#94a3b8', margin: '0 0 8px 0' }}>
-                Composing atomic components (<code style={{ color: '#38bdf8' }}>PasswordInput</code>, <code style={{ color: '#38bdf8' }}>RequirementChecklist</code>, etc.) with custom layout control.
-              </p>
+            <div className="panel-wrapper">
+              <div className="panel-header">
+                <span className="panel-tag">GRANULAR COMPONENT COMPOSITION</span>
+                <h2 className="card-title">
+                  <Code size={20} style={{ color: '#38bdf8' }} />
+                  Atomic Component Showcase
+                </h2>
+                <p className="panel-description">
+                  Build a password security interface by composing PassGuard's atomic components.
+                </p>
+              </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                {/* Granular Password Input */}
-                <div>
-                  <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#e2e8f0', marginBottom: '6px' }}>
-                    Password Entry
-                  </label>
-                  <PasswordInput
-                    value={password}
-                    onChange={(e) => handlePasswordChange(e.target.value)}
-                    placeholder="Enter synthetic password..."
-                  />
+              <div className="components-stack">
+                {/* 1. PASSWORD ENTRY SECTION */}
+                <div className="section-card">
+                  <div className="section-label">
+                    <Lock size={14} className="label-icon" />
+                    <span>PASSWORD ENTRY</span>
+                  </div>
+
+                  <div className="input-group">
+                    <PasswordInput
+                      value={password}
+                      onChange={(e) => handlePasswordChange(e.target.value)}
+                      showPassword={showPassword}
+                      toggleVisibility={() => setShowPassword((prev) => !prev)}
+                      placeholder="Enter a password..."
+                      aria-label="Password Entry Input"
+                      className="custom-passguard-input"
+                    />
+                    <div className="helper-text-row">
+                      <ShieldCheck size={13} style={{ color: '#10b981', flexShrink: 0 }} />
+                      <span>Analysis happens locally in your browser.</span>
+                    </div>
+                  </div>
                 </div>
 
-                {/* Score & Indicator */}
-                {currentAnalysis && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: '13px', color: '#94a3b8' }}>Security Health</span>
-                      <PasswordHealthScore score={currentAnalysis.score} status={currentAnalysis.status} />
+                {/* 2. SECURITY HEALTH SECTION */}
+                <div className="section-card">
+                  <div className="section-header-row">
+                    <span className="section-title">Security Health</span>
+                    {currentAnalysis && (
+                      <span className={`status-badge badge-${currentAnalysis.status}`}>
+                        {currentAnalysis.status.replace('_', ' ').toUpperCase()}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="score-hero-card">
+                    <div className="score-main-value">
+                      <span className="score-number">{currentAnalysis ? currentAnalysis.score : 0}</span>
+                      <span className="score-denom">/ 100</span>
                     </div>
-                    <PasswordStrengthIndicator score={currentAnalysis.score} />
+                    <div className="score-status-text">
+                      {currentAnalysis ? currentAnalysis.complexity.toUpperCase() : 'WEAK'}
+                    </div>
+                    <div className="indicator-wrapper">
+                      <PasswordStrengthIndicator score={currentAnalysis ? currentAnalysis.score : 0} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. REQUIREMENTS CHECKLIST SECTION */}
+                <div className="section-card">
+                  <div className="section-header-row">
+                    <span className="section-title">Requirements</span>
+                    {currentAnalysis && (
+                      <span className="requirements-count">
+                        {currentAnalysis.rules.filter((r) => r.passed).length} / {currentAnalysis.rules.length}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="checklist-wrapper">
+                    {currentAnalysis && (
+                      <RequirementChecklist
+                        rules={currentAnalysis.rules.map((r) => ({
+                          label: r.label,
+                          completed: r.passed,
+                        }))}
+                        className="custom-requirements-checklist"
+                      />
+                    )}
+                  </div>
+                </div>
+
+                {/* REUSE WARNING */}
+                {currentAnalysis?.reuse?.reused && (
+                  <div className="warning-wrapper">
+                    <ReuseWarning isVisible={true} message="This password was previously entered in this session." />
                   </div>
                 )}
 
-                {/* Requirement Checklist */}
-                {currentAnalysis && (
-                  <div>
-                    <RequirementChecklist
-                      rules={currentAnalysis.rules.map((r) => ({
-                        label: r.label,
-                        completed: r.passed,
-                      }))}
+                {/* SUGGESTION CARD */}
+                {currentAnalysis?.suggestion && (
+                  <div className="suggestion-wrapper">
+                    <SuggestionCard
+                      title={currentAnalysis.suggestion.title}
+                      description={currentAnalysis.suggestion.message}
+                      expectedScore={currentAnalysis.suggestion.expectedScore}
                     />
                   </div>
                 )}
-
-                {/* Reuse Warning */}
-                {currentAnalysis?.reuse?.reused && (
-                  <ReuseWarning isVisible={true} message="This password was previously entered in this session." />
-                )}
-
-                {/* Suggestion Card */}
-                {currentAnalysis?.suggestion && (
-                  <SuggestionCard
-                    title={currentAnalysis.suggestion.title}
-                    description={currentAnalysis.suggestion.message}
-                    expectedScore={currentAnalysis.suggestion.expectedScore}
-                  />
-                )}
               </div>
-            </>
+            </div>
           )}
         </section>
 
