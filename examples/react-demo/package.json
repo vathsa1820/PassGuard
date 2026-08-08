@@ -9,7 +9,7 @@
     "lint": "tsc --noEmit"
   },
   "dependencies": {
-    "@vatza/passguard": "*",
+    "@vatza/passguard": "1.0.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "lucide-react": "^0.300.0"
