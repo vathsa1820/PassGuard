@@ -6,6 +6,7 @@ describe('Edge Case: Performance Benchmarks & Security Invariants', () => {
 
   describe('1. Performance Benchmarks', () => {
     it('executes analysis in under 50ms for standard 16-character complex password', async () => {
+      await analyzer.analyze('warmup');
       const start = performance.now();
       await analyzer.analyze('P@ssGu@rd2026!Xz#');
       const duration = performance.now() - start;

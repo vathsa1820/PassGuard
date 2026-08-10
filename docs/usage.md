@@ -1,12 +1,13 @@
 # Usage Guide
 
-This guide provides practical integration examples for using `@vatza/passguard` in React applications, including controlled forms, submit validation, custom policies, and headless custom hooks.
+This guide provides practical integration examples for using `@vatza/passguard` in React applications, including controlled forms, signup form integration, container-aware adaptive density, and headless custom hooks.
 
 ---
 
-## 1. Controlled Component Pattern
+## 1. Zero-Config Automatic Mode vs Explicit Density
 
-PassGuard components function seamlessly as controlled components:
+### Automatic Theme & Container Adaptation
+PassGuard inspects its host parent container and automatically adapts colors and layout density:
 
 ```tsx
 import React, { useState } from 'react';
@@ -24,28 +25,24 @@ export function ControlledSignup() {
 }
 ```
 
-Or as uncontrolled components using internal fallback state:
+### Explicit Density Control
+To override automatic container measurement (e.g. inside a narrow sidebar or modal form), pass `density`:
 
 ```tsx
-import React from 'react';
-import { PasswordSecurityCard } from '@vatza/passguard';
-
-export function UncontrolledSignup() {
-  return (
-    <PasswordSecurityCard
-      onChange={(currentPassword) => {
-        console.log('Password updated');
-      }}
-    />
-  );
-}
+<PasswordSecurityCard density="compact" />
 ```
+
+Available density options:
+* `auto`: Automatically selects density based on container width (`<340px` compact, `>600px` detailed).
+* `compact` / `minimal`: Single-row requirement summary with interactive progressive disclosure toggle.
+* `standard`: Standard form view (`340px–600px`).
+* `detailed`: Extended multi-column view (`>600px`).
 
 ---
 
 ## 2. Complete Signup Form Integration
 
-Below is a complete, real-world signup form binding full-name, email, password security evaluations, confirm-password matching, and form submission validation:
+Below is a complete, real-world registration form embedding PassGuard naturally underneath a password input field:
 
 ```tsx
 import React, { useState } from 'react';
@@ -57,7 +54,6 @@ export function FullRegistrationForm() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [analysis, setAnalysis] = useState<PasswordAnalysisOutput | null>(null);
 
-  // Form submission criteria: email present, passwords match, and analysis score >= 60
   const isPasswordsMatching = password === confirmPassword;
   const isScoreAcceptable = Boolean(analysis && analysis.score >= 60 && analysis.isValid);
   const isSubmitDisabled = !email || !password || !isPasswordsMatching || !isScoreAcceptable;
@@ -70,7 +66,7 @@ export function FullRegistrationForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ maxWidth: 480, margin: '0 auto' }}>
+    <form onSubmit={handleSubmit} style={{ maxWidth: 440, margin: '0 auto' }}>
       <h2>Create Account</h2>
 
       <label htmlFor="email-input">Email Address</label>
@@ -82,7 +78,9 @@ export function FullRegistrationForm() {
         required
       />
 
+      {/* PassGuard embedded password security module */}
       <PasswordSecurityCard
+        density="compact"
         value={password}
         onChange={setPassword}
         onContinue={(analysisResult) => {
@@ -134,8 +132,7 @@ export function HeadlessPasswordInput() {
       />
 
       <div>
-        <p>Score: {analysis.score} / 100</p>
-        <p>Status: {analysis.status}</p>
+        <p>Score: {analysis.score} / 100 ({analysis.status})</p>
         <p>Entropy: {analysis.entropy} bits</p>
       </div>
 
@@ -157,37 +154,25 @@ export function HeadlessPasswordInput() {
 
 ---
 
-## 4. Asynchronous Programmatic Evaluation
+## 4. Accessibility & Reduced Motion
 
-For non-React scripts or validation pipelines, evaluate passwords directly using `analyzePassword`:
-
-```ts
-import { analyzePassword, type PasswordPolicy } from '@vatza/passguard';
-
-const policy: PasswordPolicy = {
-  minLength: 14,
-  requireUppercase: true,
-  requireNumber: true,
-  requireSymbol: true,
-  maxLength: 128,
-  requireLowercase: true,
-  preventRepeatedCharacters: true,
-  preventSequentialPatterns: true,
-  preventKeyboardPatterns: true,
-  checkCommonPasswords: true,
-  preventReuse: true,
-};
-
-async function checkUserPassword(input: string) {
-  const result = await analyzePassword(input, policy);
-  console.log('Password valid:', result.isValid);
-  console.log('Calculated score:', result.score);
-}
-```
+PassGuard components enforce accessibility out-of-the-box:
+* **Keyboard Navigation**: All inputs, toggles, and buttons support keyboard focus (`focus-visible:ring-2`).
+* **ARIA Semantics**: Collapsible checklists use `aria-expanded` and `aria-controls`.
+* **Reduced Motion**: Respects `@media (prefers-reduced-motion: reduce)` by turning off visual transition effects.
 
 ---
 
-## 5. Next Steps
+## 5. Security & Operational Boundaries
+
+PassGuard performs password strength evaluations **100% locally in browser memory**. PassGuard does **not** replace:
+- Server-side password hashing (`Argon2id`, `bcrypt`).
+- Backend authentication & session security.
+- IP rate-limiting & multi-factor authentication (MFA).
+
+---
+
+## 6. Next Steps
 
 - **[Configuration Guide](configuration.md)**: Detail custom rule properties.
 - **[Component Reference](components.md)**: Explore modular UI components.

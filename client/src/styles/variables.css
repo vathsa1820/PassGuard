@@ -1,6 +1,57 @@
-:root {
+:root, [data-passguard] {
+  /* Legacy tokens (backwards compatibility) */
   --color-weak: #ef4444;
   --color-fair: #f59e0b;
   --color-good: #3b82f6;
   --color-strong: #10b981;
+
+  /* Scoped PassGuard Adaptive Tokens */
+  --passguard-bg: #0f172a;
+  --passguard-surface: #1e293b;
+  --passguard-surface-hover: #334155;
+  --passguard-fg: #f8fafc;
+  --passguard-fg-muted: #94a3b8;
+  --passguard-border: #334155;
+  --passguard-radius: 0.75rem;
+  --passguard-font: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --passguard-accent: #3b82f6;
+  --passguard-accent-hover: #2563eb;
+  --passguard-focus: #60a5fa;
+
+  /* Status tokens */
+  --passguard-success: #10b981;
+  --passguard-warning: #f59e0b;
+  --passguard-error: #ef4444;
+  --passguard-info: #3b82f6;
+
+  /* Strength tokens */
+  --passguard-strength-weak: #ef4444;
+  --passguard-strength-fair: #f59e0b;
+  --passguard-strength-good: #3b82f6;
+  --passguard-strength-strong: #10b981;
 }
+
+[data-passguard-theme="light"] {
+  --passguard-bg: #ffffff;
+  --passguard-surface: #f8fafc;
+  --passguard-surface-hover: #f1f5f9;
+  --passguard-fg: #0f172a;
+  --passguard-fg-muted: #64748b;
+  --passguard-border: #e2e8f0;
+  --passguard-accent: #2563eb;
+  --passguard-accent-hover: #1d4ed8;
+  --passguard-focus: #3b82f6;
+}
+
+[data-passguard-theme="dark"] {
+  --passguard-bg: #0f172a;
+  --passguard-surface: #1e293b;
+  --passguard-surface-hover: #334155;
+  --passguard-fg: #f8fafc;
+  --passguard-fg-muted: #94a3b8;
+  --passguard-border: #334155;
+  --passguard-accent: #3b82f6;
+  --passguard-accent-hover: #2563eb;
+  --passguard-focus: #60a5fa;
+}
+

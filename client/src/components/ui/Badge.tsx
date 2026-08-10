@@ -10,23 +10,23 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLDivElement> {
 export const Badge = React.forwardRef<HTMLDivElement, BadgeProps>(
   ({ className, variant = 'default', size = 'md', dot = false, children, ...props }, ref) => {
     const variantStyles = {
-      default: 'bg-slate-800 text-slate-200 border-slate-700/80',
-      secondary: 'bg-slate-800/60 text-slate-300 border-slate-700/50',
-      outline: 'bg-transparent text-slate-300 border-slate-700',
-      success: 'bg-emerald-950/80 text-emerald-300 border-emerald-800/60 shadow-[0_0_8px_rgba(16,185,129,0.15)]',
-      warning: 'bg-amber-950/80 text-amber-300 border-amber-800/60 shadow-[0_0_8px_rgba(245,158,11,0.15)]',
-      error: 'bg-red-950/80 text-red-300 border-red-800/60 shadow-[0_0_8px_rgba(239,68,68,0.15)]',
-      neutral: 'bg-slate-900 text-slate-400 border-slate-800',
+      default: 'bg-[var(--passguard-surface,#1e293b)] text-[var(--passguard-fg,#f8fafc)] border-[var(--passguard-border,#334155)]',
+      secondary: 'bg-[var(--passguard-surface-hover,#334155)] text-[var(--passguard-fg-muted,#94a3b8)] border-[var(--passguard-border,#334155)]',
+      outline: 'bg-transparent text-[var(--passguard-fg,#f8fafc)] border-[var(--passguard-border,#334155)]',
+      success: 'bg-[var(--passguard-success,#10b981)]/20 text-[var(--passguard-success,#10b981)] border-[var(--passguard-success,#10b981)]/40',
+      warning: 'bg-[var(--passguard-warning,#f59e0b)]/20 text-[var(--passguard-warning,#f59e0b)] border-[var(--passguard-warning,#f59e0b)]/40',
+      error: 'bg-[var(--passguard-error,#ef4444)]/20 text-[var(--passguard-error,#ef4444)] border-[var(--passguard-error,#ef4444)]/40',
+      neutral: 'bg-[var(--passguard-surface,#1e293b)] text-[var(--passguard-fg-muted,#94a3b8)] border-[var(--passguard-border,#334155)]',
     };
 
     const dotColors = {
-      default: 'bg-slate-400',
-      secondary: 'bg-slate-400',
-      outline: 'bg-slate-400',
-      success: 'bg-emerald-400 animate-pulse',
-      warning: 'bg-amber-400 animate-pulse',
-      error: 'bg-red-400 animate-pulse',
-      neutral: 'bg-slate-500',
+      default: 'bg-[var(--passguard-fg-muted,#94a3b8)]',
+      secondary: 'bg-[var(--passguard-fg-muted,#94a3b8)]',
+      outline: 'bg-[var(--passguard-fg-muted,#94a3b8)]',
+      success: 'bg-[var(--passguard-success,#10b981)] animate-pulse',
+      warning: 'bg-[var(--passguard-warning,#f59e0b)] animate-pulse',
+      error: 'bg-[var(--passguard-error,#ef4444)] animate-pulse',
+      neutral: 'bg-[var(--passguard-fg-muted,#94a3b8)]',
     };
 
     const sizeStyles = {

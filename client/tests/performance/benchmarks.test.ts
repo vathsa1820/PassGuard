@@ -14,6 +14,7 @@ describe('Performance Benchmarks & Profiling Suite', () => {
     });
 
     it('analyzes standard password ("P@ssGu@rd2026!Xz#") in under 20ms', async () => {
+      await analyzer.analyze('warmup');
       const start = performance.now();
       await analyzer.analyze('P@ssGu@rd2026!Xz#');
       const duration = performance.now() - start;

@@ -17,7 +17,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="relative flex items-center w-full group">
         {startIcon && (
-          <div className="absolute left-3 flex items-center pointer-events-none text-slate-400 group-focus-within:text-blue-400 transition-colors duration-200">
+          <div className="absolute left-3 flex items-center pointer-events-none text-[var(--passguard-fg-muted,#94a3b8)] group-focus-within:text-[var(--passguard-accent,#3b82f6)] transition-colors duration-200">
             {startIcon}
           </div>
         )}
@@ -26,12 +26,12 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           ref={ref}
           disabled={disabled}
           className={cn(
-            'flex h-10 w-full rounded-md border bg-slate-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 transition-all duration-200',
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900',
+            'flex h-10 w-full rounded-[var(--passguard-radius,0.375rem)] border bg-[var(--passguard-bg,#0f172a)] px-3 py-2 text-sm text-[var(--passguard-fg,#f8fafc)] placeholder:text-[var(--passguard-fg-muted,#94a3b8)] transition-all duration-200',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--passguard-bg,#0f172a)]',
             error
-              ? 'border-red-500/80 focus-visible:ring-red-500'
-              : 'border-slate-800 focus-visible:border-blue-500 focus-visible:ring-blue-500/80 focus-visible:shadow-[0_0_12px_rgba(59,130,246,0.15)]',
-            disabled && 'cursor-not-allowed opacity-50 bg-slate-900',
+              ? 'border-[var(--passguard-error,#ef4444)] focus-visible:ring-[var(--passguard-error,#ef4444)]'
+              : 'border-[var(--passguard-border,#334155)] focus-visible:border-[var(--passguard-focus,#3b82f6)] focus-visible:ring-[var(--passguard-focus,#3b82f6)]',
+            disabled && 'cursor-not-allowed opacity-50 bg-[var(--passguard-surface,#1e293b)]',
             startIcon && 'pl-9',
             endIcon && 'pr-9',
             className
@@ -39,7 +39,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           {...props}
         />
         {endIcon && (
-          <div className="absolute right-3 flex items-center text-slate-400">
+          <div className="absolute right-3 flex items-center text-[var(--passguard-fg-muted,#94a3b8)]">
             {endIcon}
           </div>
         )}

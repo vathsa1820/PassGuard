@@ -1,18 +1,25 @@
 @import './theme.css';
 
-* {
+[data-passguard] {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+  container-type: inline-size;
+  container-name: passguard-container;
+}
+
+[data-passguard] *,
+[data-passguard] *::before,
+[data-passguard] *::after {
+  box-sizing: border-box;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *,
-  ::before,
-  ::after {
+  [data-passguard] *,
+  [data-passguard] *::before,
+  [data-passguard] *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
 }
+

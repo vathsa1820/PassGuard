@@ -21,7 +21,7 @@ export const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
         variant={variant}
         size={size}
         aria-label={ariaLabel}
-        className={cn('rounded-md p-0 flex items-center justify-center shrink-0', className)}
+        className={cn('rounded-[var(--passguard-radius,0.375rem)] p-0 flex items-center justify-center shrink-0', className)}
         {...props}
       >
         {icon}

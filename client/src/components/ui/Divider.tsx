@@ -19,7 +19,7 @@ export const Divider = React.forwardRef<HTMLDivElement, DividerProps>(
           ref={ref}
           role="separator"
           aria-orientation="vertical"
-          className={cn('w-[1px] h-full bg-slate-800 self-stretch my-0 mx-2', className)}
+          className={cn('w-[1px] h-full bg-[var(--passguard-border,#334155)] self-stretch my-0 mx-2', className)}
           {...props}
         />
       );
@@ -30,12 +30,12 @@ export const Divider = React.forwardRef<HTMLDivElement, DividerProps>(
         <div
           ref={ref}
           role="separator"
-          className={cn('flex items-center w-full my-4 text-xs text-slate-500', className)}
+          className={cn('flex items-center w-full my-4 text-xs text-[var(--passguard-fg-muted,#94a3b8)]', className)}
           {...props}
         >
-          <div className="flex-1 h-[1px] bg-slate-800" />
+          <div className="flex-1 h-[1px] bg-[var(--passguard-border,#334155)]" />
           <span className="px-3 select-none font-medium">{label}</span>
-          <div className="flex-1 h-[1px] bg-slate-800" />
+          <div className="flex-1 h-[1px] bg-[var(--passguard-border,#334155)]" />
         </div>
       );
     }
@@ -45,7 +45,7 @@ export const Divider = React.forwardRef<HTMLDivElement, DividerProps>(
         ref={ref}
         role="separator"
         aria-orientation="horizontal"
-        className={cn('w-full h-[1px] bg-slate-800 my-4', className)}
+        className={cn('w-full h-[1px] bg-[var(--passguard-border,#334155)] my-4', className)}
         {...props}
       />
     );

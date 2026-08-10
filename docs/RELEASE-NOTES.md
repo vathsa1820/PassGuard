@@ -1,6 +1,47 @@
 # PassGuard Release Notes
 
-## PassGuard v1.0.1 Patch Release
+## PassGuard v1.1.0 Minor Release
+
+### WHAT CHANGED
+PassGuard `v1.1.0` introduces a zero-config **Adaptive UI Engine** and **Container-Aware Responsive Density System**. Key enhancements include:
+- **Adaptive CSS Token System**: Automatically inherits host application colors, background, borders, and typography using `--passguard-*` CSS tokens.
+- **Container-Aware Responsive Density**: Dynamically adjusts visual density based on parent container width (`minimal` `<280px`, `compact` `280px–339px`, `standard` `340px–600px`, `detailed` `>600px`).
+- **Progressive Requirement Disclosure**: Compact requirement summaries (`Requirements (X/Y met)   View details →`) with full ARIA accessibility semantics.
+- **Interactive Developer Playground**: Built-in simulator in demo page allowing real-time host color, dark/light theme, and container width testing.
+- **Embedded Micro-Header Adaptation**: Reduces header icon and description whitespace when embedded in narrow form sidebars (<280px).
+
+### WHY IT MATTERS
+Developers no longer need to write custom CSS or wrap PassGuard in fixed dark-mode containers. PassGuard fits natively into any host application's login or signup form out-of-the-box.
+
+### HOW TO USE IT
+Install `@vatza/passguard` and render `<PasswordSecurityCard />`. Theme adaptation and responsive density work automatically without requiring manual configuration:
+
+```tsx
+import React, { useState } from 'react';
+import { PasswordSecurityCard } from '@vatza/passguard';
+import '@vatza/passguard/style.css';
+
+export function SignupForm() {
+  const [password, setPassword] = useState('');
+
+  return (
+    <div style={{ maxWidth: '440px', margin: '2rem auto' }}>
+      <PasswordSecurityCard
+        value={password}
+        onChange={(val) => setPassword(val)}
+      />
+    </div>
+  );
+}
+```
+
+### BACKWARD COMPATIBILITY
+PassGuard `v1.1.0` is 100% backward compatible with `v1.0.1`. All existing React components, props, hooks, engine utilities, and policy options function identically.
+
+### SECURITY BOUNDARY
+PassGuard provides **client-side password security guidance**. It does NOT replace server-side password hashing (`Argon2id`/`bcrypt`), backend authentication, multi-factor authentication (MFA), IP rate limiting, or backend session security.
+
+---
 
 ### Overview
 PassGuard `v1.0.1` is a backward-compatible patch release addressing a stylesheet packaging issue in the npm release distribution.

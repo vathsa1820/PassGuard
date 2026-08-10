@@ -8,16 +8,16 @@ export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 export const Card = React.forwardRef<HTMLDivElement, CardProps>(
   ({ className, variant = 'default', ...props }, ref) => {
     const variants = {
-      default: 'bg-slate-900/95 text-slate-100 border border-slate-800/90 shadow-2xl backdrop-blur-sm',
-      outline: 'bg-transparent text-slate-100 border border-slate-800',
-      ghost: 'bg-slate-800/30 text-slate-100 border-none shadow-none',
+      default: 'bg-[var(--passguard-surface,#0f172a)] text-[var(--passguard-fg,#f8fafc)] border border-[var(--passguard-border,#334155)] shadow-2xl backdrop-blur-sm',
+      outline: 'bg-transparent text-[var(--passguard-fg,#f8fafc)] border border-[var(--passguard-border,#334155)]',
+      ghost: 'bg-[var(--passguard-surface-hover,rgba(255,255,255,0.05))] text-[var(--passguard-fg,#f8fafc)] border-none shadow-none',
     };
 
     return (
       <div
         ref={ref}
         className={cn(
-          'rounded-xl p-5 sm:p-6 transition-all duration-200 antialiased',
+          'rounded-[var(--passguard-radius,0.75rem)] p-5 sm:p-6 transition-all duration-200 antialiased',
           variants[variant],
           className
         )}
@@ -46,7 +46,7 @@ export const CardTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <h3
     ref={ref}
-    className={cn('text-lg sm:text-xl font-bold tracking-tight text-slate-100', className)}
+    className={cn('text-lg sm:text-xl font-bold tracking-tight text-[var(--passguard-fg,#f8fafc)]', className)}
     {...props}
   />
 ));
@@ -58,7 +58,7 @@ export const CardDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <p
     ref={ref}
-    className={cn('text-xs sm:text-sm text-slate-400 leading-relaxed', className)}
+    className={cn('text-xs sm:text-sm text-[var(--passguard-fg-muted,#94a3b8)] leading-relaxed', className)}
     {...props}
   />
 ));
@@ -78,8 +78,9 @@ export const CardFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn('flex items-center pt-4 border-t border-slate-800/80', className)}
+    className={cn('flex items-center pt-4 border-t border-[var(--passguard-border,#334155)]', className)}
     {...props}
   />
 ));
+
 CardFooter.displayName = 'CardFooter';

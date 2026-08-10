@@ -17,14 +17,14 @@ export const Label = React.forwardRef<HTMLLabelElement, LabelProps>(
       <label
         ref={ref}
         className={cn(
-          'text-xs font-medium leading-none text-slate-300 select-none flex items-center gap-1',
+          'text-xs font-medium leading-none text-[var(--passguard-fg,#f8fafc)] select-none flex items-center gap-1',
           disabled && 'cursor-not-allowed opacity-50',
           className
         )}
         {...props}
       >
         {children}
-        {required && <span className="text-red-400 font-bold" aria-hidden="true">*</span>}
+        {required && <span className="text-[var(--passguard-error,#ef4444)] font-bold" aria-hidden="true">*</span>}
       </label>
     );
   }

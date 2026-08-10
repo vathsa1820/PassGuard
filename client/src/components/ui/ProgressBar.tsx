@@ -31,16 +31,16 @@ export const ProgressBar = React.forwardRef<HTMLDivElement, ProgressBarProps>(
     const percentage = Math.min(Math.max((value / max) * 100, 0), 100);
 
     const variantColors = {
-      default: 'bg-blue-500',
-      success: 'bg-emerald-500',
-      warning: 'bg-amber-500',
-      error: 'bg-red-500',
+      default: 'bg-[var(--passguard-accent,#3b82f6)]',
+      success: 'bg-[var(--passguard-success,#10b981)]',
+      warning: 'bg-[var(--passguard-warning,#f59e0b)]',
+      error: 'bg-[var(--passguard-error,#ef4444)]',
     };
 
     return (
       <div ref={ref} className={cn('w-full space-y-1.5', className)} {...props}>
         {showLabel && (
-          <div className="flex justify-between text-xs text-slate-400">
+          <div className="flex justify-between text-xs text-[var(--passguard-fg-muted,#94a3b8)]">
             <span>Progress</span>
             <span className="font-mono">{Math.round(percentage)}%</span>
           </div>
@@ -56,7 +56,7 @@ export const ProgressBar = React.forwardRef<HTMLDivElement, ProgressBarProps>(
                   key={idx}
                   className={cn(
                     'h-2 flex-1 rounded-full transition-all duration-300',
-                    isFilled ? variantColors[variant] : 'bg-slate-800'
+                    isFilled ? variantColors[variant] : 'bg-[var(--passguard-surface-hover,#334155)]'
                   )}
                 />
               );
@@ -68,7 +68,7 @@ export const ProgressBar = React.forwardRef<HTMLDivElement, ProgressBarProps>(
             aria-valuenow={value}
             aria-valuemin={0}
             aria-valuemax={max}
-            className="w-full bg-slate-800 h-2 rounded-full overflow-hidden"
+            className="w-full bg-[var(--passguard-surface-hover,#334155)] h-2 rounded-full overflow-hidden"
           >
             <div
               className={cn(

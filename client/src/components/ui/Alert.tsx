@@ -10,17 +10,17 @@ export interface AlertProps extends React.HTMLAttributes<HTMLDivElement> {
 export const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
   ({ className, variant = 'info', icon, children, ...props }, ref) => {
     const variantStyles = {
-      info: 'bg-slate-900/90 text-slate-200 border-slate-800/80',
-      success: 'bg-emerald-950/40 text-emerald-200 border-emerald-800/60 shadow-[0_2px_8px_rgba(16,185,129,0.08)]',
-      warning: 'bg-amber-950/40 text-amber-200 border-amber-800/60 shadow-[0_2px_8px_rgba(245,158,11,0.08)]',
-      error: 'bg-red-950/40 text-red-200 border-red-800/60 shadow-[0_2px_8px_rgba(239,68,68,0.08)]',
+      info: 'bg-[var(--passguard-info,#3b82f6)]/15 text-[var(--passguard-fg,#f8fafc)] border-[var(--passguard-info,#3b82f6)]/30',
+      success: 'bg-[var(--passguard-success,#10b981)]/15 text-[var(--passguard-fg,#f8fafc)] border-[var(--passguard-success,#10b981)]/30',
+      warning: 'bg-[var(--passguard-warning,#f59e0b)]/15 text-[var(--passguard-fg,#f8fafc)] border-[var(--passguard-warning,#f59e0b)]/30',
+      error: 'bg-[var(--passguard-error,#ef4444)]/15 text-[var(--passguard-fg,#f8fafc)] border-[var(--passguard-error,#ef4444)]/30',
     };
 
     const defaultIcons = {
-      info: <Info className="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />,
-      success: <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />,
-      warning: <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />,
-      error: <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />,
+      info: <Info className="w-4 h-4 text-[var(--passguard-info,#3b82f6)] shrink-0 mt-0.5" />,
+      success: <CheckCircle2 className="w-4 h-4 text-[var(--passguard-success,#10b981)] shrink-0 mt-0.5" />,
+      warning: <AlertTriangle className="w-4 h-4 text-[var(--passguard-warning,#f59e0b)] shrink-0 mt-0.5" />,
+      error: <AlertCircle className="w-4 h-4 text-[var(--passguard-error,#ef4444)] shrink-0 mt-0.5" />,
     };
 
     return (
@@ -28,7 +28,7 @@ export const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
         ref={ref}
         role="alert"
         className={cn(
-          'relative w-full rounded-lg border p-3.5 text-xs sm:text-sm flex gap-3 items-start transition-all duration-200 antialiased',
+          'relative w-full rounded-[var(--passguard-radius,0.5rem)] border p-3.5 text-xs sm:text-sm flex gap-3 items-start transition-all duration-200 antialiased',
           variantStyles[variant],
           className
         )}
@@ -48,7 +48,7 @@ export const AlertTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <h5
     ref={ref}
-    className={cn('font-semibold leading-none tracking-tight text-slate-100 mb-1', className)}
+    className={cn('font-semibold leading-none tracking-tight text-[var(--passguard-fg,#f8fafc)] mb-1', className)}
     {...props}
   />
 ));
@@ -60,7 +60,7 @@ export const AlertDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn('text-xs text-slate-400 leading-relaxed', className)}
+    className={cn('text-xs text-[var(--passguard-fg-muted,#94a3b8)] leading-relaxed', className)}
     {...props}
   />
 ));

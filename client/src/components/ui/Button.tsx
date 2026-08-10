@@ -33,15 +33,15 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const baseStyles =
-      'inline-flex items-center justify-center font-medium rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 disabled:opacity-50 disabled:pointer-events-none select-none';
+      'inline-flex items-center justify-center font-medium rounded-[var(--passguard-radius,0.375rem)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--passguard-focus,#3b82f6)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--passguard-bg,#0f172a)] disabled:opacity-50 disabled:pointer-events-none select-none';
 
     const variantStyles = {
-      default: 'bg-slate-100 text-slate-900 hover:bg-slate-200 active:bg-slate-300 shadow-sm',
-      secondary: 'bg-slate-800 text-slate-100 hover:bg-slate-700 active:bg-slate-600 border border-slate-700/60',
-      outline: 'border border-slate-700 bg-transparent text-slate-200 hover:bg-slate-800 hover:text-slate-100',
-      ghost: 'bg-transparent text-slate-300 hover:bg-slate-800 hover:text-slate-100',
-      destructive: 'bg-red-600 text-white hover:bg-red-700 active:bg-red-800 shadow-sm',
-      link: 'text-blue-400 underline-offset-4 hover:underline p-0 h-auto',
+      default: 'bg-[var(--passguard-accent,#3b82f6)] text-white hover:bg-[var(--passguard-accent-hover,#2563eb)] active:opacity-90 shadow-sm',
+      secondary: 'bg-[var(--passguard-surface,#1e293b)] text-[var(--passguard-fg,#f8fafc)] hover:bg-[var(--passguard-surface-hover,#334155)] border border-[var(--passguard-border,#334155)]',
+      outline: 'border border-[var(--passguard-border,#334155)] bg-transparent text-[var(--passguard-fg,#f8fafc)] hover:bg-[var(--passguard-surface-hover,#334155)]',
+      ghost: 'bg-transparent text-[var(--passguard-fg-muted,#94a3b8)] hover:bg-[var(--passguard-surface-hover,#334155)] hover:text-[var(--passguard-fg,#f8fafc)]',
+      destructive: 'bg-[var(--passguard-error,#ef4444)] text-white hover:opacity-90 shadow-sm',
+      link: 'text-[var(--passguard-accent,#3b82f6)] underline-offset-4 hover:underline p-0 h-auto',
     };
 
     const sizeStyles = {

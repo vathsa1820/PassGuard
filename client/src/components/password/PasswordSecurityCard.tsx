@@ -16,6 +16,8 @@ import { cn } from '../../lib/utils';
 import { usePasswordAnalysis } from '../../hooks/usePasswordAnalysis';
 import { PasswordAnalysisOutput } from '../../engine';
 
+import { useAdaptiveTheme } from '../../theme/useAdaptiveTheme';
+import { AdaptiveDensity, PassGuardThemeOverride } from '../../theme/types';
 import { PasswordPolicy } from '../../config';
 
 export interface RequirementItem {
@@ -41,6 +43,8 @@ export interface PasswordSecurityCardProps {
   onContinue?: (analysis?: PasswordAnalysisOutput | null) => void;
   stateProps?: PasswordSecurityCardStateProps;
   policy?: Partial<PasswordPolicy> | PasswordPolicy;
+  density?: AdaptiveDensity;
+  override?: PassGuardThemeOverride;
 }
 
 export const PasswordSecurityCard: React.FC<PasswordSecurityCardProps> = React.memo(({
@@ -50,7 +54,19 @@ export const PasswordSecurityCard: React.FC<PasswordSecurityCardProps> = React.m
   onContinue,
   stateProps,
   policy,
+  density: explicitDensity,
+  override,
 }) => {
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const theme = useAdaptiveTheme(containerRef, override);
+
+  const containerWidth = theme.containerWidth;
+  const activeDensity = explicitDensity && explicitDensity !== 'auto'
+    ? (explicitDensity === 'minimal' ? 'compact' : explicitDensity)
+    : theme.density;
+
+  const isMinimal = explicitDensity === 'minimal' || (activeDensity === 'compact' && containerWidth > 0 && containerWidth < 280);
+  const isCompact = activeDensity === 'compact';
   const isStaticMode = stateProps !== undefined;
 
   const [internalPassword, setInternalPassword] = useState(stateProps?.password || '');
@@ -124,28 +140,63 @@ export const PasswordSecurityCard: React.FC<PasswordSecurityCardProps> = React.m
 
   const analysis = isStaticMode ? null : liveAnalysis;
 
+  const dynamicStyle = {
+    '--passguard-bg': theme.colors.bg,
+    '--passguard-surface': theme.colors.surface,
+    '--passguard-surface-hover': theme.colors.surfaceHover,
+    '--passguard-fg': theme.colors.fg,
+    '--passguard-fg-muted': theme.colors.fgMuted,
+    '--passguard-border': theme.colors.border,
+    '--passguard-accent': theme.colors.accent,
+    '--passguard-accent-hover': theme.colors.accentHover,
+    '--passguard-focus': theme.colors.focus,
+    '--passguard-radius': theme.radius,
+    '--passguard-font': theme.font,
+  } as React.CSSProperties;
+
   return (
-    <Card className={cn('w-full max-w-full sm:max-w-md md:max-w-lg mx-auto p-4 sm:p-6 space-y-4 sm:space-y-5 bg-slate-900 border-slate-800 shadow-xl overflow-hidden', className)}>
-      {/* Card Header */}
-      <CardHeader className="space-y-1 px-0 pt-0 pb-3 sm:pb-4 border-b border-slate-800/80">
-        <div className="flex items-center gap-2.5 sm:gap-3">
-          <div className="p-2 sm:p-2.5 rounded-lg bg-blue-950/60 border border-blue-800/50 text-blue-400 shrink-0">
-            <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6" aria-hidden="true" />
-          </div>
-          <div className="min-w-0">
-            <CardTitle className="text-lg sm:text-xl font-bold text-slate-100 truncate">
+    <Card
+      ref={containerRef}
+      data-passguard=""
+      data-passguard-theme={theme.mode}
+      data-passguard-density={activeDensity}
+      style={dynamicStyle}
+      className={cn(
+        'w-full max-w-full sm:max-w-md md:max-w-lg mx-auto bg-[var(--passguard-surface,#0f172a)] border-[var(--passguard-border,#334155)] shadow-xl overflow-hidden transition-all',
+        isMinimal ? 'p-2 space-y-2' : isCompact ? 'p-3 space-y-3' : 'p-4 sm:p-6 space-y-4 sm:space-y-5',
+        className
+      )}
+    >
+      {/* Card Header — Density-Aware Micro Adaptation */}
+      <CardHeader className={cn(
+        'space-y-1 px-0 pt-0 border-b border-[var(--passguard-border,#334155)]',
+        isMinimal ? 'pb-1 space-y-0' : isCompact ? 'pb-2 space-y-0.5' : 'pb-3 sm:pb-4'
+      )}>
+        <div className="flex items-center gap-2 sm:gap-3">
+          {!isCompact && (
+            <div className="p-2 sm:p-2.5 rounded-[var(--passguard-radius,0.5rem)] bg-[var(--passguard-accent,#3b82f6)]/15 border border-[var(--passguard-accent,#3b82f6)]/30 text-[var(--passguard-accent,#3b82f6)] shrink-0">
+              <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6" aria-hidden="true" />
+            </div>
+          )}
+          <div className="min-w-0 flex-1">
+            <CardTitle className={cn(
+              'font-bold text-[var(--passguard-fg,#f8fafc)] truncate',
+              isMinimal ? 'text-xs' : isCompact ? 'text-sm' : 'text-lg sm:text-xl'
+            )}>
               Password Security
             </CardTitle>
-            <CardDescription className="text-xs sm:text-sm text-slate-400 truncate">
-              Create a strong password to protect your account
-            </CardDescription>
+            {!isCompact && (
+              <CardDescription className="text-xs sm:text-sm text-[var(--passguard-fg-muted,#94a3b8)] truncate">
+                Create a strong password to protect your account
+              </CardDescription>
+            )}
           </div>
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-3.5 sm:space-y-4 p-0">
+      <CardContent className={cn('p-0', isMinimal ? 'space-y-2' : isCompact ? 'space-y-2.5' : 'space-y-3.5 sm:space-y-4')}>
         {/* Molecule 1: PasswordInput */}
-        <div className="space-y-1.5 sm:space-y-2">
+        <div className="space-y-1 sm:space-y-1.5">
           <Label htmlFor="passguard-input" required className="text-xs sm:text-sm">
             Password
           </Label>
@@ -160,21 +211,21 @@ export const PasswordSecurityCard: React.FC<PasswordSecurityCardProps> = React.m
         </div>
 
         {/* Molecule 2 & 3: PasswordHealthScore & PasswordStrengthIndicator */}
-        <div className="space-y-2">
-          <PasswordHealthScore score={score} status={status} showScore={true} />
+        <div className="space-y-1.5 sm:space-y-2">
+          <PasswordHealthScore score={score} status={status} showScore={true} density={activeDensity} />
           <PasswordStrengthIndicator score={score} />
         </div>
 
         {/* Molecule 4: RequirementChecklist */}
-        <RequirementChecklist rules={rules} />
+        <RequirementChecklist rules={rules} density={activeDensity} />
 
         {/* Success Banner if 100% score */}
         {successMessage && (
-          <Alert variant="success" icon={<CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />}>
-            <AlertTitle className="text-xs font-semibold text-emerald-300 mb-0.5">
+          <Alert variant="success" icon={<CheckCircle2 className="w-4 h-4 text-[var(--passguard-success,#10b981)] shrink-0 mt-0.5" />}>
+            <AlertTitle className="text-xs font-semibold text-[var(--passguard-success,#10b981)] mb-0.5">
               Security Standard Met
             </AlertTitle>
-            <AlertDescription className="text-xs text-emerald-200/80">
+            <AlertDescription className="text-xs text-[var(--passguard-fg-muted,#94a3b8)]">
               {successMessage}
             </AlertDescription>
           </Alert>
@@ -182,11 +233,11 @@ export const PasswordSecurityCard: React.FC<PasswordSecurityCardProps> = React.m
 
         {/* Common Breach Warning */}
         {commonWarning && (
-          <Alert variant="error" icon={<AlertOctagon className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />}>
-            <AlertTitle className="text-xs font-semibold text-red-300 mb-0.5">
+          <Alert variant="error" icon={<AlertOctagon className="w-4 h-4 text-[var(--passguard-error,#ef4444)] shrink-0 mt-0.5" />}>
+            <AlertTitle className="text-xs font-semibold text-[var(--passguard-error,#ef4444)] mb-0.5">
               Common Password Flagged
             </AlertTitle>
-            <AlertDescription className="text-xs text-red-200/80">
+            <AlertDescription className="text-xs text-[var(--passguard-fg-muted,#94a3b8)]">
               {commonWarning}
             </AlertDescription>
           </Alert>
@@ -198,6 +249,7 @@ export const PasswordSecurityCard: React.FC<PasswordSecurityCardProps> = React.m
             title="Smart Suggestion"
             description={suggestion}
             expectedScore={expectedScoreBoost}
+            density={activeDensity}
           />
         )}
 
@@ -206,18 +258,22 @@ export const PasswordSecurityCard: React.FC<PasswordSecurityCardProps> = React.m
           <ReuseWarning
             isVisible={reuseWarning.isVisible}
             message={reuseWarning.message}
+            density={activeDensity}
           />
         )}
       </CardContent>
 
-      <Divider className="my-1.5 sm:my-2" />
+      <Divider className={isMinimal ? 'my-0.5' : isCompact ? 'my-1' : 'my-1.5 sm:my-2'} />
 
       {/* Primary Action Button */}
-      <CardFooter className="px-0 pb-0 pt-1.5 sm:pt-2">
+      <CardFooter className="px-0 pb-0 pt-1 sm:pt-2">
         <Button
           variant="default"
-          size="lg"
-          className="w-full h-11 sm:h-12 text-sm sm:text-base font-semibold shadow-md gap-2 active:scale-[0.98] transition-transform"
+          size={isCompact ? 'md' : 'lg'}
+          className={cn(
+            'w-full font-semibold shadow-md gap-2 active:scale-[0.98] transition-transform',
+            isMinimal ? 'h-9 text-xs' : isCompact ? 'h-10 text-sm' : 'h-11 sm:h-12 text-sm sm:text-base'
+          )}
           onClick={() => onContinue?.(analysis)}
           rightIcon={<ArrowRight className="w-4 h-4" />}
         >

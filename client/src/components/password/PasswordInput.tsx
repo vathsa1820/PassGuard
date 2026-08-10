@@ -47,7 +47,7 @@ export const PasswordInput: React.FC<PasswordInputProps> = ({
       disabled={disabled}
       autoComplete="new-password"
       className={cn('h-11 text-sm sm:text-base pr-11', className)}
-      startIcon={<Lock className="w-4 h-4 text-slate-400" aria-hidden="true" />}
+      startIcon={<Lock className="w-4 h-4 text-[var(--passguard-fg-muted,#94a3b8)]" aria-hidden="true" />}
       endIcon={
         <IconButton
           type="button"
@@ -57,12 +57,12 @@ export const PasswordInput: React.FC<PasswordInputProps> = ({
           aria-label={isVisible ? 'Hide password' : 'Show password'}
           aria-pressed={isVisible}
           onClick={handleToggle}
-          className="w-9 h-9 sm:w-10 sm:h-10 hover:bg-slate-800/80 active:scale-95"
+          className="w-9 h-9 sm:w-10 sm:h-10 hover:bg-[var(--passguard-surface-hover,#334155)] active:scale-95"
           icon={
             isVisible ? (
-              <EyeOff className="w-4 h-4 text-slate-400 hover:text-slate-200 transition-colors" aria-hidden="true" />
+              <EyeOff className="w-4 h-4 text-[var(--passguard-fg-muted,#94a3b8)] hover:text-[var(--passguard-fg,#f8fafc)] transition-colors" aria-hidden="true" />
             ) : (
-              <Eye className="w-4 h-4 text-slate-400 hover:text-slate-200 transition-colors" aria-hidden="true" />
+              <Eye className="w-4 h-4 text-[var(--passguard-fg-muted,#94a3b8)] hover:text-[var(--passguard-fg,#f8fafc)] transition-colors" aria-hidden="true" />
             )
           }
         />

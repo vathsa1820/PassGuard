@@ -2,21 +2,13 @@
 
 PassGuard is an open-source React component library and zero-knowledge security engine that provides real-time, interactive password strength guidance as users type.
 
-This guide will help you install PassGuard, add your first `<PasswordSecurityCard />` component, configure custom security policies, and handle real-time password analysis callbacks.
+PassGuard automatically adapts to your host application's theme colors, light/dark modes, font family, and container density without requiring complex theme configuration.
 
 ---
 
-## 1. What is PassGuard?
+## 1. Quick Installation
 
-PassGuard helps web applications guide users toward creating resilient, strong, and unique passwords without relying on opaque post-submission validation errors.
-
-All password evaluations occur **100% locally inside client browser memory**. PassGuard never transmits passwords or hashes to remote servers, makes zero HTTP requests, and stores no plaintext credentials.
-
----
-
-## 2. Quick Installation
-
-Install `@vatza/passguard` and its required peer dependencies:
+Install `@vatza/passguard` via npm:
 
 ```bash
 npm install @vatza/passguard
@@ -28,13 +20,11 @@ Import the pre-styled CSS stylesheet at your application root (e.g. `main.tsx` o
 import '@vatza/passguard/style.css';
 ```
 
-For complete installation details and build requirements, see the [Installation Guide](installation.md).
-
 ---
 
-## 3. Your First Component
+## 2. Automatic Mode (`<PasswordSecurityCard />`)
 
-To add real-time password security guidance to a React form, render the `<PasswordSecurityCard />` component:
+PassGuard automatically detects parent container background color, text color, and width to adjust theme tokens (`--passguard-*`) and information density (`compact`, `standard`, `detailed`).
 
 ```tsx
 import React, { useState } from 'react';
@@ -45,7 +35,7 @@ export function SignupPage() {
   const [password, setPassword] = useState('');
 
   return (
-    <div style={{ maxWidth: '480px', margin: '2rem auto' }}>
+    <div style={{ maxWidth: '440px', margin: '2rem auto' }}>
       <PasswordSecurityCard
         value={password}
         onChange={(val) => setPassword(val)}
@@ -62,9 +52,36 @@ export function SignupPage() {
 
 ---
 
-## 4. Configuring a Custom Policy
+## 3. Explicit Density Override (`density="compact"`)
 
-PassGuard enforces default security rules (12-character minimum, uppercase, lowercase, numbers, symbols, pattern detection, common password check, and reuse warning). You can override these defaults by passing a custom `PasswordPolicy` object:
+You can explicitly control component density when rendering inside tight sidebars or embedded login modals:
+
+```tsx
+import React from 'react';
+import { PasswordSecurityCard } from '@vatza/passguard';
+import '@vatza/passguard/style.css';
+
+export function CompactModalSignup() {
+  return (
+    <PasswordSecurityCard density="compact" />
+  );
+}
+```
+
+---
+
+## 4. Container-Aware Density Thresholds
+
+PassGuard measures its immediate DOM parent container width using `ResizeObserver`:
+
+* **`minimal` (`<280px`)**: Single-row title header, compact padding (`p-2`), single-row requirement summary (`Requirements (X/Y met)`).
+* **`compact` (`280px–339px`)**: Compact header, single-row requirement summary with `View details →` toggle.
+* **`standard` (`340px–600px`)**: Icon header, standard requirement grid.
+* **`detailed` (`>600px`)**: Full dashboard layout with uncollapsed requirement list.
+
+---
+
+## 5. Configuring Custom Security Policy
 
 ```tsx
 import React, { useState } from 'react';
@@ -97,14 +114,20 @@ export function EnterpriseSignup() {
 }
 ```
 
-For a complete reference of policy options, see the [Configuration Guide](configuration.md).
+---
+
+## 6. Security Boundaries
+
+PassGuard performs password analysis **100% client-side in browser memory**. PassGuard does **not** replace:
+- Server-side password hashing (`Argon2id`, `bcrypt`).
+- Backend authentication & session security.
+- IP rate-limiting & multi-factor authentication (MFA).
 
 ---
 
-## 5. Next Steps
+## 7. Next Steps
 
-- **[Usage Guide](usage.md)**: Form submit validation, controlled patterns, and headless custom hooks.
-- **[Configuration Guide](configuration.md)**: Full `PasswordPolicy` reference table and validation logic.
-- **[Component Reference](components.md)**: Detailed props and usage for all 7 exported UI components.
-- **[Public API Reference](api-reference.md)**: Full TypeScript signatures for hooks, functions, and types.
-- **[Security Model](security.md)**: Zero-knowledge architecture, threat boundaries, and backend responsibilities.
+- **[Usage Guide](usage.md)**: Controlled components, signup form integration, and headless hooks.
+- **[Configuration Guide](configuration.md)**: Full `PasswordPolicy` options.
+- **[Component Reference](components.md)**: Props for all PassGuard components.
+- **[Security Model](../SECURITY.md)**: Security boundaries and threat disclosures.

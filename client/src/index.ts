@@ -73,3 +73,25 @@ export type {
   CommonPasswordResult,
   ReuseResult,
 } from './types/password';
+
+// Adaptive Theme Engine & Utilities
+export { AdaptiveThemeProvider, type AdaptiveThemeProviderProps } from './theme/AdaptiveThemeProvider';
+export { useAdaptiveTheme } from './theme/useAdaptiveTheme';
+export {
+  parseCssColor,
+  calculateRelativeLuminance,
+  getContrastRatio,
+  isLightColor,
+  isDarkColor,
+  getReadableForegroundColor,
+  deriveAccentVariants,
+  rgbaToHex,
+} from './theme/themeDetector';
+export type {
+  AdaptiveDensity,
+  AdaptiveThemeMode,
+  PassGuardThemeOverride,
+  ResolvedThemeColors,
+  AdaptiveTheme,
+} from './theme/types';
+

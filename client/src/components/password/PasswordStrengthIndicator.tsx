@@ -19,10 +19,10 @@ export const PasswordStrengthIndicator: React.FC<PasswordStrengthIndicatorProps>
   const normalizedScore = Math.min(Math.max(score, 0), 100);
 
   const getBarColor = (s: number) => {
-    if (s >= 80) return 'bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.3)]';
-    if (s >= 60) return 'bg-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.3)]';
-    if (s >= 40) return 'bg-amber-500 shadow-[0_0_12px_rgba(245,158,11,0.3)]';
-    return 'bg-red-500 shadow-[0_0_12px_rgba(239,68,68,0.3)]';
+    if (s >= 80) return 'bg-[var(--passguard-strength-strong,#10b981)] shadow-[0_0_12px_rgba(16,185,129,0.3)]';
+    if (s >= 60) return 'bg-[var(--passguard-strength-good,#3b82f6)] shadow-[0_0_12px_rgba(59,130,246,0.3)]';
+    if (s >= 40) return 'bg-[var(--passguard-strength-fair,#f59e0b)] shadow-[0_0_12px_rgba(245,158,11,0.3)]';
+    return 'bg-[var(--passguard-strength-weak,#ef4444)] shadow-[0_0_12px_rgba(239,68,68,0.3)]';
   };
 
   return (
@@ -34,7 +34,7 @@ export const PasswordStrengthIndicator: React.FC<PasswordStrengthIndicatorProps>
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuetext={`Password security score: ${normalizedScore} out of 100`}
-        className="w-full bg-slate-800/80 h-2 rounded-full overflow-hidden p-0.5"
+        className="w-full bg-[var(--passguard-surface-hover,#334155)] h-2 rounded-full overflow-hidden p-0.5"
       >
         <motion.div
           className={cn('h-full rounded-full transition-colors duration-300', getBarColor(normalizedScore))}
