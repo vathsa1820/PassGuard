@@ -1,15 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   PasswordSecurityCard,
-  PasswordInput,
-  PasswordHealthScore,
-  PasswordStrengthIndicator,
-  RequirementChecklist,
-  SuggestionCard,
-  ReuseWarning,
-  usePasswordAnalyzer,
+  usePasswordAnalysis,
   type PasswordPolicy,
-  type PasswordAnalysis,
+  type PasswordAnalysisOutput,
+  type AdaptiveDensity,
+  type PassGuardThemeOverride,
 } from '@vatza/passguard';
 
 import '@vatza/passguard/style.css';
@@ -17,19 +13,22 @@ import './demo.css';
 
 import {
   ShieldCheck,
-  Lock,
-  ExternalLink,
-  Code,
-  Sliders,
   Sparkles,
-  Info,
-  AlertTriangle,
+  ChevronDown,
+  ChevronUp,
+  Check,
+  Cpu,
+  Lock,
+  Layout,
+  Palette,
+  ExternalLink,
   Github,
   Package,
+  CheckCircle2,
+  Code,
 } from 'lucide-react';
 
-// Enterprise password policy used for the demonstration
-const demoPolicy: PasswordPolicy = {
+const defaultPolicy: PasswordPolicy = {
   minLength: 12,
   maxLength: 128,
   requireUppercase: true,
@@ -43,44 +42,96 @@ const demoPolicy: PasswordPolicy = {
   preventReuse: true,
 };
 
-// Synthetic password presets representing required evaluation states
-const PRESETS = [
-  { label: '1. Empty', value: '', description: 'Empty initial state' },
-  { label: '2. Very Weak', value: '12345', description: 'Short & sequential digits' },
-  { label: '3. Common', value: 'password123', description: 'Common dictionary word' },
-  { label: '4. Pattern-Based', value: 'qwerty123456', description: 'Keyboard pattern & sequence' },
-  { label: '5. Medium', value: 'BlueSky2024!', description: 'Meets basic criteria' },
-  { label: '6. Strong', value: 'K8#mP9$xL2!w', description: 'High entropy & varied chars' },
-  { label: '7. Long Strong', value: 'correct-horse-battery-staple-77#Pass', description: 'Passphrase style high complexity' },
+const PASSWORD_PRESETS = [
+  { label: 'Empty', value: '', desc: 'Initial empty input state' },
+  { label: 'Very Weak', value: '12345', desc: 'Short sequential digits' },
+  { label: 'Common', value: 'password123', desc: 'Known leaked password' },
+  { label: 'Pattern-Based', value: 'qwerty123456', desc: 'Keyboard pattern' },
+  { label: 'Medium', value: 'BlueSky2024!', desc: 'Standard complexity' },
+  { label: 'Strong', value: 'K8#mP9$xL2!w', desc: 'High entropy & varied chars' },
+  { label: 'Long Strong', value: 'correct-horse-battery-staple-77#Pass', desc: 'Passphrase style' },
 ];
 
 export default function App() {
-  const [password, setPassword] = useState('');
-  const [activePreset, setActivePreset] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<'card' | 'custom'>('custom');
+  const [password, setPassword] = useState('K8#mP9$xL2!w');
+  const [signupName, setSignupName] = useState('Jane Developer');
+  const [signupEmail, setSignupEmail] = useState('jane@company.com');
+  const [confirmPassword, setConfirmPassword] = useState('K8#mP9$xL2!w');
+  const [submitted, setSubmitted] = useState(false);
+
+  // Playground adaptive theme states
+  const [preset, setPreset] = useState<'saas' | 'cyber' | 'banking' | 'custom'>('saas');
+  const [themeMode, setThemeMode] = useState<'auto' | 'light' | 'dark'>('light');
+  const [accentColor, setAccentColor] = useState('#7c3aed');
+  const [bgColor, setBgColor] = useState('#f8fafc');
+  const [borderRadius, setBorderRadius] = useState('0.5rem');
+
+  // Container width trigger state
+  const [containerWidth, setContainerWidth] = useState<number>(400);
+  const [density, setDensity] = useState<AdaptiveDensity>('auto');
+
+  // Diagnostics accordion
+  const [showDiagnostics, setShowDiagnostics] = useState(false);
   const [showRawJson, setShowRawJson] = useState(false);
-  const [liveAnalysis, setLiveAnalysis] = useState<PasswordAnalysis | null>(null);
-  const [showPassword, setShowPassword] = useState(false);
 
-  // Hook instance for Mode 2: Granular Headless Integration
-  const analyzer = usePasswordAnalyzer({
-    initialPassword: password,
-  });
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [measuredWidth, setMeasuredWidth] = useState<number>(400);
 
-  const handlePresetSelect = (val: string) => {
-    setPassword(val);
-    analyzer.setPassword(val);
-    setActivePreset(val);
+  // Real-time analysis telemetry hook for diagnostics
+  const analysis = usePasswordAnalysis(password, defaultPolicy);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setMeasuredWidth(Math.round(entry.contentRect.width));
+      }
+    });
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  const handleApplyPreset = (p: 'saas' | 'cyber' | 'banking' | 'custom') => {
+    setPreset(p);
+    if (p === 'saas') {
+      setThemeMode('light');
+      setBgColor('#f8fafc');
+      setAccentColor('#7c3aed');
+      setBorderRadius('0.5rem');
+    } else if (p === 'cyber') {
+      setThemeMode('dark');
+      setBgColor('#09090b');
+      setAccentColor('#00d4ff');
+      setBorderRadius('0.5rem');
+    } else if (p === 'banking') {
+      setThemeMode('light');
+      setBgColor('#ffffff');
+      setAccentColor('#123456');
+      setBorderRadius('0.125rem');
+    }
   };
 
-  const handlePasswordChange = (val: string) => {
+  const handlePasswordPresetSelect = (val: string) => {
     setPassword(val);
-    analyzer.setPassword(val);
-    setActivePreset(null);
+    setConfirmPassword(val);
   };
 
-  // Active analysis data from whichever view mode is active
-  const currentAnalysis = viewMode === 'card' ? liveAnalysis : analyzer.analysis;
+  const handleSubmitForm = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitted(true);
+    setTimeout(() => setSubmitted(false), 4000);
+  };
+
+  const computedDensity = density !== 'auto'
+    ? (density === 'minimal' ? 'compact' : density)
+    : (measuredWidth < 280 ? 'minimal' : measuredWidth < 340 ? 'compact' : measuredWidth > 600 ? 'detailed' : 'standard');
+
+  const themeOverride: PassGuardThemeOverride = {
+    mode: themeMode,
+    accent: accentColor,
+    bg: bgColor,
+    radius: borderRadius,
+  };
 
   return (
     <div className="demo-container">
@@ -88,11 +139,11 @@ export default function App() {
       <header className="demo-header" role="banner">
         <div className="brand-badge">
           <ShieldCheck size={16} />
-          <span>PassGuard v1.0.1 Public Live Demo</span>
+          <span>PassGuard v1.1.1 Public Live Demo</span>
         </div>
         <h1 className="demo-title">PassGuard Interactive Demonstration</h1>
         <p className="demo-subtitle">
-          Real-time, zero-knowledge password security guidance component library for React applications.
+          Seamless, zero-knowledge password security experience underneath standard signup fields.
         </p>
       </header>
 
@@ -101,330 +152,336 @@ export default function App() {
         <ShieldCheck size={24} className="privacy-banner-icon" />
         <div>
           <p className="privacy-banner-text">
-            <strong>Zero-Knowledge Privacy:</strong> Password analysis runs locally in your browser. Your password is not sent to a server.
+            <strong>Zero-Knowledge Privacy:</strong> Password analysis runs 100% locally in browser memory. Plaintext passwords never leave your client device.
           </p>
         </div>
       </section>
 
-      {/* SYNTHETIC PRESETS BAR */}
-      <section className="presets-section" aria-label="Synthetic Password Presets">
-        <div className="presets-header">
-          <h2 className="presets-title">Test Synthetic Password Presets</h2>
-          <span style={{ fontSize: '12px', color: '#94a3b8' }}>
-            Click a preset to evaluate synthetic password scenarios in real time
-          </span>
+      {/* HERO DEMO: REALISTIC MODERN SAAS SIGNUP INTEGRATION */}
+      <main className="hero-signup-section" aria-label="PassGuard Hero Signup Form Integration">
+        <div className="section-label-header">
+          <Sparkles className="w-4 h-4 text-purple-400" />
+          <span>HERO DEMO — REALISTIC SIGNUP INTEGRATION</span>
         </div>
-        <div className="presets-grid" role="group" aria-label="Synthetic password presets">
-          {PRESETS.map((preset) => (
-            <button
-              key={preset.label}
-              type="button"
-              className={`preset-btn ${activePreset === preset.value ? 'active' : ''}`}
-              onClick={() => handlePresetSelect(preset.value)}
-              title={preset.description}
+
+        <div
+          className="signup-preview-viewport"
+          style={{ backgroundColor: bgColor }}
+        >
+          <div
+            ref={containerRef}
+            style={{ width: `${containerWidth}px` }}
+            className="signup-card-container"
+          >
+            <div
+              className="signup-card"
+              style={{
+                backgroundColor: themeMode === 'dark' || (themeMode === 'auto' && preset === 'cyber') ? '#121215' : '#ffffff',
+                color: themeMode === 'dark' || (themeMode === 'auto' && preset === 'cyber') ? '#f8fafc' : '#0f172a',
+                borderColor: themeMode === 'dark' || (themeMode === 'auto' && preset === 'cyber') ? '#27272a' : '#e2e8f0',
+                borderRadius: borderRadius,
+              }}
             >
-              <Sparkles size={14} />
-              <span>{preset.label}</span>
-            </button>
-          ))}
+              <div className="signup-card-header">
+                <h2 className="signup-title">Create your account</h2>
+                <p className="signup-subtitle">Join thousands of developers building secure applications.</p>
+              </div>
+
+              {submitted && (
+                <div className="signup-success-alert">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>Account registration submitted successfully!</span>
+                </div>
+              )}
+
+              <form onSubmit={handleSubmitForm} className="signup-form">
+                <div className="form-group">
+                  <label className="form-label">Email</label>
+                  <input
+                    type="email"
+                    value={signupEmail}
+                    onChange={(e) => setSignupEmail(e.target.value)}
+                    required
+                    placeholder="name@company.com"
+                    className="form-input"
+                    style={{ borderRadius: borderRadius }}
+                  />
+                </div>
+
+                {/* PASSGUARD COMPONENT EMBEDDED UNDER PASSWORD FIELD */}
+                <div className="form-group">
+                  <PasswordSecurityCard
+                    policy={defaultPolicy}
+                    value={password}
+                    density={density}
+                    override={themeOverride}
+                    onChange={(val) => {
+                      setPassword(val);
+                      setConfirmPassword(val);
+                    }}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Confirm password</label>
+                  <input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    placeholder="Re-enter password..."
+                    className="form-input"
+                    style={{ borderRadius: borderRadius }}
+                  />
+                  {confirmPassword && (
+                    <div className="password-match-status">
+                      {confirmPassword === password ? (
+                        <span className="text-emerald-400 flex items-center gap-1">
+                          <Check className="w-3.5 h-3.5" /> Passwords match
+                        </span>
+                      ) : (
+                        <span className="text-red-400 flex items-center gap-1">
+                          Passwords do not match
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={!password || confirmPassword !== password}
+                  className="submit-btn"
+                  style={{
+                    backgroundColor: accentColor,
+                    borderRadius: borderRadius,
+                  }}
+                >
+                  Create account
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      {/* SECONDARY DEVELOPER CONTROLS TOOLBAR */}
+      <section className="developer-controls-section" aria-label="Developer Testing Controls">
+        <div className="controls-header">
+          <Layout className="w-4 h-4 text-purple-400" />
+          <h2 className="controls-title">Developer Testing Toolbar</h2>
+        </div>
+
+        <div className="controls-grid">
+          {/* Host Presets */}
+          <div className="control-card">
+            <span className="control-label">Host UI Presets</span>
+            <div className="button-group">
+              {(['saas', 'cyber', 'banking'] as const).map((p) => (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => handleApplyPreset(p)}
+                  className={`btn-toggle ${preset === p ? 'active' : ''}`}
+                >
+                  {p === 'saas' ? 'SaaS' : p === 'cyber' ? 'Cyber' : 'Banking'}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Theme Mode */}
+          <div className="control-card">
+            <span className="control-label">Theme Mode</span>
+            <div className="button-group">
+              {(['auto', 'light', 'dark'] as const).map((mode) => (
+                <button
+                  key={mode}
+                  type="button"
+                  onClick={() => {
+                    setThemeMode(mode);
+                    setPreset('custom');
+                  }}
+                  className={`btn-toggle ${themeMode === mode ? 'active' : ''}`}
+                >
+                  {mode}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Host Accent Color */}
+          <div className="control-card">
+            <span className="control-label">Host Accent Color</span>
+            <div className="accent-picker-row">
+              <input
+                type="color"
+                value={accentColor}
+                onChange={(e) => {
+                  setAccentColor(e.target.value);
+                  setPreset('custom');
+                }}
+                className="color-swatch-input"
+                title="Choose custom accent color"
+              />
+              <div className="swatch-list">
+                {['#7c3aed', '#00d4ff', '#123456', '#ff4ecd', '#ff6b35'].map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    style={{ backgroundColor: c }}
+                    onClick={() => {
+                      setAccentColor(c);
+                      setPreset('custom');
+                    }}
+                    className="swatch-btn"
+                    title={`Set accent color ${c}`}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Border Radius */}
+          <div className="control-card">
+            <span className="control-label">Border Radius</span>
+            <div className="button-group">
+              {['0.125rem', '0.5rem', '0.75rem', '1rem'].map((r) => (
+                <button
+                  key={r}
+                  type="button"
+                  onClick={() => {
+                    setBorderRadius(r);
+                    setPreset('custom');
+                  }}
+                  className={`btn-toggle font-mono ${borderRadius === r ? 'active' : ''}`}
+                >
+                  {r}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Container Width Slider & Preset Triggers */}
+        <div className="width-control-panel">
+          <div className="width-control-header">
+            <span className="flex items-center gap-1.5 text-xs text-slate-300">
+              <Layout className="w-3.5 h-3.5 text-purple-400" /> Container Width Trigger:
+              <strong className="text-white font-mono">{containerWidth}px</strong>
+            </span>
+            <span className="density-badge">
+              Detected Density: {computedDensity}
+            </span>
+          </div>
+
+          <input
+            type="range"
+            min="240"
+            max="1000"
+            step="10"
+            value={containerWidth}
+            onChange={(e) => setContainerWidth(parseInt(e.target.value, 10))}
+            className="width-range-slider"
+          />
+
+          <div className="preset-width-buttons">
+            <span className="text-xs text-slate-400 font-medium">Quick width presets:</span>
+            {[240, 300, 400, 700, 1000].map((w) => (
+              <button
+                key={w}
+                type="button"
+                onClick={() => setContainerWidth(w)}
+                className={`preset-width-btn ${containerWidth === w ? 'active' : ''}`}
+              >
+                {w}px
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Password Presets Bar */}
+        <div className="password-presets-panel">
+          <span className="control-label">Test Password Presets</span>
+          <div className="password-presets-grid">
+            {PASSWORD_PRESETS.map((p) => (
+              <button
+                key={p.label}
+                type="button"
+                onClick={() => handlePasswordPresetSelect(p.value)}
+                className={`password-preset-btn ${password === p.value ? 'active' : ''}`}
+                title={p.desc}
+              >
+                <Sparkles className="w-3 h-3 text-purple-400" />
+                <span>{p.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* VIEW MODE TABS */}
-      <div className="view-tabs" role="tablist" aria-label="Component Display Mode">
+      {/* DEVELOPER DIAGNOSTICS & TELEMETRY (COLLAPSIBLE ACCORDION) */}
+      <section className="diagnostics-section" aria-label="Developer Diagnostics Accordion">
         <button
           type="button"
-          role="tab"
-          aria-selected={viewMode === 'card'}
-          className={`tab-btn ${viewMode === 'card' ? 'active' : ''}`}
-          onClick={() => setViewMode('card')}
+          onClick={() => setShowDiagnostics((prev) => !prev)}
+          className="diagnostics-accordion-toggle"
         >
-          <Sliders size={14} style={{ display: 'inline', marginRight: '6px', verticalAlign: '-2px' }} />
-          Out-of-the-Box Security Card (`PasswordSecurityCard`)
+          <div className="toggle-label flex items-center gap-2">
+            <Cpu className="w-4 h-4 text-purple-400" />
+            <span>Developer Telemetry & Engine Diagnostics</span>
+            <span className="toggle-subtitle font-mono">
+              (score: {analysis.score}/100, {analysis.status})
+            </span>
+          </div>
+          {showDiagnostics ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
         </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={viewMode === 'custom'}
-          className={`tab-btn ${viewMode === 'custom' ? 'active' : ''}`}
-          onClick={() => setViewMode('custom')}
-        >
-          <Code size={14} style={{ display: 'inline', marginRight: '6px', verticalAlign: '-2px' }} />
-          Granular Components (`usePasswordAnalyzer` Hook)
-        </button>
-      </div>
 
-      {/* MAIN DEMO GRID */}
-      <div className="demo-grid">
-        {/* LEFT COLUMN: INTERACTIVE COMPONENT DEMO */}
-        <section className="card-container left-panel" aria-label="Interactive Password Evaluation Area">
-          {viewMode === 'card' ? (
-            <div className="panel-wrapper">
-              <div className="panel-header">
-                <h2 className="card-title">
-                  <Lock size={20} style={{ color: '#38bdf8' }} />
-                  Unified Security Card View
-                </h2>
-                <p className="panel-description">
-                  Standard zero-knowledge component rendering live score, checklist, and guidance.
-                </p>
+        {showDiagnostics && (
+          <div className="diagnostics-content">
+            <div className="telemetry-grid">
+              <div className="telemetry-card">
+                <span className="telemetry-label">Score</span>
+                <span className="telemetry-value font-mono">{analysis.score} / 100</span>
               </div>
-              <div className="card-surface">
-                <PasswordSecurityCard
-                  policy={demoPolicy}
-                  value={password}
-                  onChange={handlePasswordChange}
-                  onContinue={(analysis) => {
-                    setLiveAnalysis(analysis || null);
-                  }}
-                />
+              <div className="telemetry-card">
+                <span className="telemetry-label">Status</span>
+                <span className="telemetry-value text-emerald-400">{analysis.status}</span>
+              </div>
+              <div className="telemetry-card">
+                <span className="telemetry-label">Entropy Bits</span>
+                <span className="telemetry-value text-purple-400 font-mono">{analysis.entropy} bits</span>
+              </div>
+              <div className="telemetry-card">
+                <span className="telemetry-label">Crack Time</span>
+                <span className="telemetry-value text-blue-400 truncate">{analysis.crackTime}</span>
               </div>
             </div>
-          ) : (
-            <div className="panel-wrapper">
-              <div className="panel-header">
-                <span className="panel-tag">GRANULAR COMPONENT COMPOSITION</span>
-                <h2 className="card-title">
-                  <Code size={20} style={{ color: '#38bdf8' }} />
-                  Atomic Component Showcase
-                </h2>
-                <p className="panel-description">
-                  Build a password security interface by composing PassGuard's atomic components.
-                </p>
-              </div>
 
-              <div className="components-stack">
-                {/* 1. PASSWORD ENTRY SECTION */}
-                <div className="section-card">
-                  <div className="section-label">
-                    <Lock size={14} className="label-icon" />
-                    <span>PASSWORD ENTRY</span>
-                  </div>
-
-                  <div className="input-group">
-                    <PasswordInput
-                      value={password}
-                      onChange={(e) => handlePasswordChange(e.target.value)}
-                      showPassword={showPassword}
-                      toggleVisibility={() => setShowPassword((prev) => !prev)}
-                      placeholder="Enter a password..."
-                      aria-label="Password Entry Input"
-                      className="custom-passguard-input"
-                    />
-                    <div className="helper-text-row">
-                      <ShieldCheck size={13} style={{ color: '#10b981', flexShrink: 0 }} />
-                      <span>Analysis happens locally in your browser.</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 2. SECURITY HEALTH SECTION */}
-                <div className="section-card">
-                  <div className="section-header-row">
-                    <span className="section-title">Security Health</span>
-                    {currentAnalysis && (
-                      <span className={`status-badge badge-${currentAnalysis.status}`}>
-                        {currentAnalysis.status.replace('_', ' ').toUpperCase()}
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="score-hero-card">
-                    <div className="score-main-value">
-                      <span className="score-number">{currentAnalysis ? currentAnalysis.score : 0}</span>
-                      <span className="score-denom">/ 100</span>
-                    </div>
-                    <div className="score-status-text">
-                      {currentAnalysis ? currentAnalysis.complexity.toUpperCase() : 'WEAK'}
-                    </div>
-                    <div className="indicator-wrapper">
-                      <PasswordStrengthIndicator score={currentAnalysis ? currentAnalysis.score : 0} />
-                    </div>
-                  </div>
-                </div>
-
-                {/* 3. REQUIREMENTS CHECKLIST SECTION */}
-                <div className="section-card">
-                  <div className="section-header-row">
-                    <span className="section-title">Requirements</span>
-                    {currentAnalysis && (
-                      <span className="requirements-count">
-                        {currentAnalysis.rules.filter((r) => r.passed).length} / {currentAnalysis.rules.length}
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="checklist-wrapper">
-                    {currentAnalysis && (
-                      <RequirementChecklist
-                        rules={currentAnalysis.rules.map((r) => ({
-                          label: r.label,
-                          completed: r.passed,
-                        }))}
-                        className="custom-requirements-checklist"
-                      />
-                    )}
-                  </div>
-                </div>
-
-                {/* REUSE WARNING */}
-                {currentAnalysis?.reuse?.reused && (
-                  <div className="warning-wrapper">
-                    <ReuseWarning isVisible={true} message="This password was previously entered in this session." />
-                  </div>
-                )}
-
-                {/* SUGGESTION CARD */}
-                {currentAnalysis?.suggestion && (
-                  <div className="suggestion-wrapper">
-                    <SuggestionCard
-                      title={currentAnalysis.suggestion.title}
-                      description={currentAnalysis.suggestion.message}
-                      expectedScore={currentAnalysis.suggestion.expectedScore}
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </section>
-
-        {/* RIGHT COLUMN: REAL-TIME TELEMETRY INSPECTOR */}
-        <section className="card-container" aria-label="Real-Time Analysis Output Inspector">
-          <h2 className="card-title">
-            <Info size={20} style={{ color: '#38bdf8' }} />
-            Real-Time Analysis Inspector
-          </h2>
-          <p style={{ fontSize: '13px', color: '#94a3b8', margin: '0 0 4px 0' }}>
-            Live telemetry data returned by the PassGuard engine for developer integration.
-          </p>
-
-          <div className="inspector-panel">
-            <div className="metric-row">
-              <span className="metric-label">Evaluation Status</span>
-              {currentAnalysis ? (
-                <span className={`badge badge-${currentAnalysis.status}`}>
-                  {currentAnalysis.status.replace('_', ' ')}
-                </span>
-              ) : (
-                <span className="metric-value">Pending Input</span>
-              )}
-            </div>
-
-            <div className="metric-row">
-              <span className="metric-label">Security Score</span>
-              <span className="metric-value">
-                {currentAnalysis ? `${currentAnalysis.score} / 100` : '0 / 100'}
-              </span>
-            </div>
-
-            <div className="metric-row">
-              <span className="metric-label">Computed Entropy</span>
-              <span className="metric-value">
-                {currentAnalysis ? `${currentAnalysis.entropy} bits (${currentAnalysis.complexity})` : '0 bits'}
-              </span>
-            </div>
-
-            <div className="metric-row">
-              <span className="metric-label">Estimated Crack Time</span>
-              <span className="metric-value">
-                {currentAnalysis ? currentAnalysis.crackTime : 'Instant'}
-              </span>
-            </div>
-
-            <div className="metric-row">
-              <span className="metric-label">Rules Passed</span>
-              <span className="metric-value">
-                {currentAnalysis
-                  ? `${currentAnalysis.rules.filter((r) => r.passed).length} / ${currentAnalysis.rules.length}`
-                  : '0 / 0'}
-              </span>
-            </div>
-
-            <div className="metric-row">
-              <span className="metric-label">Pattern Warnings</span>
-              <span className="metric-value">
-                {currentAnalysis?.patterns && currentAnalysis.patterns.length > 0
-                  ? `⚠️ ${currentAnalysis.patterns.length} Pattern(s) Detected`
-                  : '✓ None'}
-              </span>
-            </div>
-
-            <div className="metric-row">
-              <span className="metric-label">Common Password</span>
-              <span className="metric-value">
-                {currentAnalysis?.commonPassword?.isCommon ? '❌ Known Common' : '✓ Safe'}
-              </span>
-            </div>
-
-            <div className="metric-row">
-              <span className="metric-label">Session Reuse</span>
-              <span className="metric-value">
-                {currentAnalysis?.reuse?.reused ? '⚠️ Reused in Session' : '✓ Unique'}
-              </span>
-            </div>
-
-            {/* RAW JSON TOGGLE */}
-            <div style={{ marginTop: '12px' }}>
+            <div className="json-toggle-wrapper">
               <button
                 type="button"
+                onClick={() => setShowRawJson((prev) => !prev)}
                 className="preset-btn"
-                style={{ width: '100%', justifyContent: 'center' }}
-                onClick={() => setShowRawJson(!showRawJson)}
               >
                 <Code size={14} />
                 <span>{showRawJson ? 'Hide Raw Analysis Object' : 'Inspect Raw Analysis Payload (JSON)'}</span>
               </button>
 
               {showRawJson && (
-                <div style={{ marginTop: '12px' }}>
-                  <pre className="json-viewer">
-                    {JSON.stringify(currentAnalysis, null, 2) || '// Enter a password to inspect telemetry payload'}
-                  </pre>
-                </div>
+                <pre className="json-viewer mt-3">
+                  {JSON.stringify(analysis, null, 2)}
+                </pre>
               )}
             </div>
           </div>
-        </section>
-      </div>
-
-      {/* SECURITY DISCLOSURE & ARCHITECTURE BOUNDARIES */}
-      <section className="security-disclosure" aria-label="Security Disclosure and Boundaries">
-        <h2 className="disclosure-title">
-          <AlertTriangle size={20} style={{ color: '#f59e0b' }} />
-          Client-Side Security Model & Technical Disclosure
-        </h2>
-        <p style={{ fontSize: '14px', color: '#cbd5e1', margin: 0, lineHeight: 1.5 }}>
-          PassGuard provides real-time client-side password strength evaluation and security guidance directly within browser memory.
-        </p>
-        <ul className="disclosure-list">
-          <li>
-            <strong>Does NOT Replace Server Security:</strong> PassGuard is a guidance tool. It does not replace server-side password hashing (e.g. Argon2id, bcrypt), authentication logic, or rate limiting.
-          </li>
-          <li>
-            <strong>Zero-Knowledge Memory Boundary:</strong> Plaintext password inputs remain in volatile component state and are never logged, serialized, or sent over network sockets.
-          </li>
-          <li>
-            <strong>WebCrypto API Requirement:</strong> Local SHA-256 reuse hashing requires a Secure Context (HTTPS or localhost).
-          </li>
-        </ul>
-        <div>
-          <a
-            href="https://github.com/vathsa1820/PassGuard/blob/main/docs/SECURITY.md"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="disclosure-link"
-          >
-            <span>Read full Security Policy in Repository</span>
-            <ExternalLink size={14} />
-          </a>
-        </div>
+        )}
       </section>
 
       {/* FOOTER SECTION */}
       <footer className="demo-footer" role="contentinfo">
         <div>
-          <strong>Built with PassGuard</strong> — <code style={{ color: '#38bdf8' }}>@vatza/passguard@1.0.1</code>
+          <strong>Built with PassGuard</strong> — <code className="text-purple-300 font-mono">@vatza/passguard@1.1.1</code>
         </div>
         <div className="footer-links">
           <a
