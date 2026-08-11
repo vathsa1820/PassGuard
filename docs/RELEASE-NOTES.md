@@ -1,5 +1,19 @@
 # PassGuard Release Notes
 
+## PassGuard v1.1.2 Patch Release
+
+### WHAT CHANGED
+PassGuard `v1.1.2` publishes the refined **Compact Password UX Architecture**:
+- **Compact Password-First Layout**: Embeds zero-knowledge security guidance directly underneath host application password inputs with thin 4px strength indicator and compact status row (`✓ Strong · 84%`).
+- **Progressive Disclosure Toggle**: Requirement checklist is collapsed by default (`Show details →` / `Hide details ↑`) with full accessibility semantics (`aria-expanded`, `aria-controls`).
+- **Form Integration**: Removes standalone dashboard clutter and large vertical blocks, blending seamlessly into standard signup and login forms.
+
+### BACKWARD COMPATIBILITY & SECURITY
+- 100% backward compatible with `v1.1.1` and `v1.1.0`.
+- `client/src/engine/**` security algorithms and zero-knowledge boundaries remain 100% untouched.
+
+---
+
 ## PassGuard v1.1.1 Patch Release
 
 ### WHAT CHANGED

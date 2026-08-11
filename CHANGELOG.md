@@ -10,6 +10,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ---
 
+## [1.1.2] - 2026-08-11
+
+### Changed
+- **Compact Password UX Architecture**: Exported compact password security card experience with progressive disclosure requirement checklist collapsed by default (`aria-expanded="false"`, `aria-controls`).
+- **Inline Status Row**: Integrated thin 4px strength bar directly below password input with inline status (`✓ Strong · 84%`) aligned horizontally with interactive `Show details →` toggle button.
+- **Form-First Alignment**: Optimized container density and host alignment for modern signup/login forms without dashboard clutter or excessive vertical whitespace.
+
+### Security & Compatibility
+- **Zero Engine Changes**: No engine or security calculation logic was altered (`client/src/engine/**` remains 100% untouched).
+- **Zero Breaking API Changes**: All React components, props, hooks, types, and adaptive CSS variable APIs remain 100% backward compatible.
+
+---
+
 ## [1.1.1] - 2026-08-11
 
 ### Fixed

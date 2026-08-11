@@ -139,7 +139,7 @@ export default function App() {
       <header className="demo-header" role="banner">
         <div className="brand-badge">
           <ShieldCheck size={16} />
-          <span>PassGuard v1.1.1 Public Live Demo</span>
+          <span>PassGuard v1.1.2 Public Live Demo</span>
         </div>
         <h1 className="demo-title">PassGuard Interactive Demonstration</h1>
         <p className="demo-subtitle">
@@ -481,7 +481,7 @@ export default function App() {
       {/* FOOTER SECTION */}
       <footer className="demo-footer" role="contentinfo">
         <div>
-          <strong>Built with PassGuard</strong> — <code className="text-purple-300 font-mono">@vatza/passguard@1.1.1</code>
+          <strong>Built with PassGuard</strong> — <code className="text-purple-300 font-mono">@vatza/passguard@1.1.2</code>
         </div>
         <div className="footer-links">
           <a
