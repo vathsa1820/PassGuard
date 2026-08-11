@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { PasswordAnalyzer, PasswordAnalysisOutput } from '../engine';
 import { createRulesFromPolicy } from '../engine/rules/passwordRules';
+import { calculateScore } from '../engine/scoring/ScoreEngine';
 import { PasswordPolicy, resolvePasswordPolicy } from '../config';
 
 // Shared singleton instance of default PasswordAnalyzer
@@ -38,29 +39,24 @@ export function usePasswordAnalysis(
     return policy ? resolvePasswordPolicy(policy) : undefined;
   }, [policySerialized]);
 
-  const policyRef = useRef(activePolicy);
-  policyRef.current = activePolicy;
-
-  const [analysis, setAnalysis] = useState<PasswordAnalysisOutput>(() =>
-    createInitialAnalysisOutput(password, activePolicy)
-  );
-
-  const prevPasswordRef = useRef<string>(password);
+  const [asyncAnalysis, setAsyncAnalysis] = useState<PasswordAnalysisOutput | null>(null);
+  const [analyzedPassword, setAnalyzedPassword] = useState<string>('');
 
   useEffect(() => {
     let isCurrent = true;
-    prevPasswordRef.current = password;
 
     if (!password) {
-      setAnalysis(createInitialAnalysisOutput('', policyRef.current));
+      setAsyncAnalysis(null);
+      setAnalyzedPassword('');
       return;
     }
 
-    const analyzer = getOrCreateAnalyzer(policyRef.current);
+    const analyzer = getOrCreateAnalyzer(activePolicy);
 
     analyzer.analyze(password).then((result) => {
       if (isCurrent) {
-        setAnalysis(result);
+        setAsyncAnalysis(result);
+        setAnalyzedPassword(password);
       }
     });
 
@@ -69,7 +65,15 @@ export function usePasswordAnalysis(
     };
   }, [password, policySerialized]);
 
-  return analysis;
+  const syncAnalysis = useMemo(() => {
+    return createInitialAnalysisOutput(password, activePolicy);
+  }, [password, policySerialized]);
+
+  if (asyncAnalysis && analyzedPassword === password) {
+    return asyncAnalysis;
+  }
+
+  return syncAnalysis;
 }
 
 /**
@@ -89,14 +93,16 @@ function createInitialAnalysisOutput(password: string, policy?: PasswordPolicy):
     };
   });
 
+  const scoreResult = calculateScore(rules);
+
   return {
-    score: 0,
-    status: 'Weak',
-    color: 'red',
-    percentage: 0,
-    entropy: 0,
-    complexity: 'Very Low',
-    crackTime: 'Instant',
+    score: isPresent ? scoreResult.score : 0,
+    status: isPresent ? scoreResult.status : 'Weak',
+    color: isPresent ? scoreResult.color : 'red',
+    percentage: isPresent ? scoreResult.percentage : 0,
+    entropy: isPresent ? Math.round(password.length * 4) : 0,
+    complexity: isPresent ? 'Medium' : 'Very Low',
+    crackTime: isPresent ? 'Calculating...' : 'Instant',
     rules,
     patterns: [],
     commonPassword: { isCommon: false, risk: 'None', message: 'Password is not in common breach database.' },

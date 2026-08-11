@@ -55,7 +55,7 @@ describe('RequirementChecklist Component Tests', () => {
     expect(screen.getByText('(2/3 met)')).toBeInTheDocument();
 
     // Toggle button exists with aria-expanded="false"
-    const toggleButton = screen.getByRole('button', { name: /view details/i });
+    const toggleButton = screen.getByRole('button', { name: /show details|view details/i });
     expect(toggleButton).toBeInTheDocument();
     expect(toggleButton).toHaveAttribute('aria-expanded', 'false');
     expect(toggleButton).toHaveAttribute('aria-controls');
@@ -73,11 +73,11 @@ describe('RequirementChecklist Component Tests', () => {
 
   it('honors explicit density overrides', () => {
     render(<RequirementChecklist rules={sampleRules} density="detailed" />);
-    expect(screen.queryByRole('button', { name: /view details/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /show details|view details/i })).not.toBeInTheDocument();
     expect(screen.getByText('At least 12 characters')).toBeInTheDocument();
 
     const { unmount } = render(<RequirementChecklist rules={sampleRules} density="compact" />);
-    expect(screen.getByRole('button', { name: /view details/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /show details|view details/i })).toBeInTheDocument();
     unmount();
   });
 

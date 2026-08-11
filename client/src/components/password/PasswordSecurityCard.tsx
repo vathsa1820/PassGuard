@@ -11,7 +11,7 @@ import { PasswordStrengthIndicator } from './PasswordStrengthIndicator';
 import { RequirementChecklist } from './RequirementChecklist';
 import { SuggestionCard } from './SuggestionCard';
 import { ReuseWarning } from './ReuseWarning';
-import { ShieldCheck, ArrowRight, CheckCircle2, AlertOctagon } from 'lucide-react';
+import { ShieldCheck, ArrowRight, CheckCircle2, AlertOctagon, ChevronDown, ChevronUp } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { usePasswordAnalysis } from '../../hooks/usePasswordAnalysis';
 import { PasswordAnalysisOutput } from '../../engine';
@@ -41,6 +41,7 @@ export interface PasswordSecurityCardProps {
   value?: string;
   onChange?: (password: string) => void;
   onContinue?: (analysis?: PasswordAnalysisOutput | null) => void;
+  showContinueButton?: boolean;
   stateProps?: PasswordSecurityCardStateProps;
   policy?: Partial<PasswordPolicy> | PasswordPolicy;
   density?: AdaptiveDensity;
@@ -52,6 +53,7 @@ export const PasswordSecurityCard: React.FC<PasswordSecurityCardProps> = React.m
   value,
   onChange,
   onContinue,
+  showContinueButton = true,
   stateProps,
   policy,
   density: explicitDensity,
@@ -67,10 +69,13 @@ export const PasswordSecurityCard: React.FC<PasswordSecurityCardProps> = React.m
 
   const isMinimal = explicitDensity === 'minimal' || (activeDensity === 'compact' && containerWidth > 0 && containerWidth < 280);
   const isCompact = activeDensity === 'compact';
+  const isDetailed = activeDensity === 'detailed';
   const isStaticMode = stateProps !== undefined;
 
   const [internalPassword, setInternalPassword] = useState(stateProps?.password || '');
   const [showPassword, setShowPassword] = useState(false);
+  const [isDetailsExpanded, setIsDetailsExpanded] = useState(false);
+  const checklistId = React.useId();
 
   const password = value !== undefined ? value : internalPassword;
 
@@ -155,132 +160,136 @@ export const PasswordSecurityCard: React.FC<PasswordSecurityCardProps> = React.m
   } as React.CSSProperties;
 
   return (
-    <Card
+    <div
       ref={containerRef}
       data-passguard=""
       data-passguard-theme={theme.mode}
       data-passguard-density={activeDensity}
       style={dynamicStyle}
       className={cn(
-        'w-full max-w-full sm:max-w-md md:max-w-lg mx-auto bg-[var(--passguard-surface,#0f172a)] border-[var(--passguard-border,#334155)] shadow-xl overflow-hidden transition-all',
-        isMinimal ? 'p-2 space-y-2' : isCompact ? 'p-3 space-y-3' : 'p-4 sm:p-6 space-y-4 sm:space-y-5',
+        'w-full max-w-full mx-auto text-[var(--passguard-fg,#f8fafc)] font-sans transition-all space-y-2',
+        isMinimal ? 'space-y-1.5' : isCompact ? 'space-y-2' : 'space-y-2.5',
         className
       )}
     >
-      {/* Card Header — Density-Aware Micro Adaptation */}
-      <CardHeader className={cn(
-        'space-y-1 px-0 pt-0 border-b border-[var(--passguard-border,#334155)]',
-        isMinimal ? 'pb-1 space-y-0' : isCompact ? 'pb-2 space-y-0.5' : 'pb-3 sm:pb-4'
-      )}>
-        <div className="flex items-center gap-2 sm:gap-3">
-          {!isCompact && (
-            <div className="p-2 sm:p-2.5 rounded-[var(--passguard-radius,0.5rem)] bg-[var(--passguard-accent,#3b82f6)]/15 border border-[var(--passguard-accent,#3b82f6)]/30 text-[var(--passguard-accent,#3b82f6)] shrink-0">
-              <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6" aria-hidden="true" />
-            </div>
-          )}
-          <div className="min-w-0 flex-1">
-            <CardTitle className={cn(
-              'font-bold text-[var(--passguard-fg,#f8fafc)] truncate',
-              isMinimal ? 'text-xs' : isCompact ? 'text-sm' : 'text-lg sm:text-xl'
-            )}>
-              Password Security
-            </CardTitle>
-            {!isCompact && (
-              <CardDescription className="text-xs sm:text-sm text-[var(--passguard-fg-muted,#94a3b8)] truncate">
-                Create a strong password to protect your account
-              </CardDescription>
+      {/* Molecule 1: Password Label & PasswordInput */}
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between text-xs sm:text-sm">
+          <Label htmlFor="passguard-input" required className="font-semibold text-sm sm:text-base text-[var(--passguard-fg,#f8fafc)] flex items-center gap-1.5 leading-tight">
+            {!isCompact && !isMinimal && (
+              <ShieldCheck className="w-4 h-4 text-[var(--passguard-accent,#3b82f6)] passguard-header-icon lucide-shield-check shrink-0" aria-hidden="true" />
             )}
+            <span>Password</span>
+          </Label>
+          <span className="sr-only">Password Security</span>
+        </div>
+        <PasswordInput
+          id="passguard-input"
+          value={password}
+          onChange={handlePasswordChange}
+          showPassword={showPassword}
+          toggleVisibility={togglePasswordVisibility}
+          placeholder="Enter password..."
+        />
+      </div>
+
+      {/* Progress Bar (3-5px thin bar, 6-8px below input) */}
+      <PasswordStrengthIndicator score={score} />
+
+      {/* Compact Score Status Row (28-32px total height, aligned horizontally with input) */}
+      <div className="flex items-center justify-between min-h-[28px] h-7 sm:h-8 w-full px-0 select-none">
+        <PasswordHealthScore score={score} status={status} showScore={true} density={activeDensity} />
+      </div>
+
+      {/* Requirement Checklist (Expandable via details toggle) */}
+      <RequirementChecklist rules={rules} density={activeDensity} />
+
+      {/* Detailed Container Rich Security Telemetry (>600px width) */}
+      {isDetailed && analysis && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-[var(--passguard-border,#334155)]/40 text-xs">
+          <div className="p-2 rounded-[var(--passguard-radius,0.375rem)] bg-[var(--passguard-surface,#1e293b)] border border-[var(--passguard-border,#334155)]/60">
+            <span className="text-[var(--passguard-fg-muted,#94a3b8)] block text-[10px] uppercase font-mono">Entropy</span>
+            <span className="font-bold font-mono">{analysis.entropy} bits</span>
+          </div>
+          <div className="p-2 rounded-[var(--passguard-radius,0.375rem)] bg-[var(--passguard-surface,#1e293b)] border border-[var(--passguard-border,#334155)]/60">
+            <span className="text-[var(--passguard-fg-muted,#94a3b8)] block text-[10px] uppercase font-mono">Length</span>
+            <span className="font-bold font-mono">{password.length} chars</span>
+          </div>
+          <div className="p-2 rounded-[var(--passguard-radius,0.375rem)] bg-[var(--passguard-surface,#1e293b)] border border-[var(--passguard-border,#334155)]/60">
+            <span className="text-[var(--passguard-fg-muted,#94a3b8)] block text-[10px] uppercase font-mono">Crack Time</span>
+            <span className="font-bold font-mono truncate block">{analysis.crackTime}</span>
+          </div>
+          <div className="p-2 rounded-[var(--passguard-radius,0.375rem)] bg-[var(--passguard-surface,#1e293b)] border border-[var(--passguard-border,#334155)]/60">
+            <span className="text-[var(--passguard-fg-muted,#94a3b8)] block text-[10px] uppercase font-mono">Breach Flag</span>
+            <span className={cn('font-bold font-mono', analysis.commonPassword.isCommon ? 'text-[var(--passguard-error,#ef4444)]' : 'text-[var(--passguard-success,#10b981)]')}>
+              {analysis.commonPassword.isCommon ? 'Flagged' : 'Safe'}
+            </span>
           </div>
         </div>
-      </CardHeader>
+      )}
 
-      <CardContent className={cn('p-0', isMinimal ? 'space-y-2' : isCompact ? 'space-y-2.5' : 'space-y-3.5 sm:space-y-4')}>
-        {/* Molecule 1: PasswordInput */}
-        <div className="space-y-1 sm:space-y-1.5">
-          <Label htmlFor="passguard-input" required className="text-xs sm:text-sm">
-            Password
-          </Label>
-          <PasswordInput
-            id="passguard-input"
-            value={password}
-            onChange={handlePasswordChange}
-            showPassword={showPassword}
-            toggleVisibility={togglePasswordVisibility}
-            placeholder="Enter password..."
-          />
-        </div>
+      {/* Success Banner if 100% score */}
+      {successMessage && (
+        <Alert variant="success" icon={<CheckCircle2 className="w-4 h-4 text-[var(--passguard-success,#10b981)] shrink-0 mt-0.5" />}>
+          <AlertTitle className="text-xs font-semibold text-[var(--passguard-success,#10b981)] mb-0.5">
+            Security Standard Met
+          </AlertTitle>
+          <AlertDescription className="text-xs text-[var(--passguard-fg-muted,#94a3b8)]">
+            {successMessage}
+          </AlertDescription>
+        </Alert>
+      )}
 
-        {/* Molecule 2 & 3: PasswordHealthScore & PasswordStrengthIndicator */}
-        <div className="space-y-1.5 sm:space-y-2">
-          <PasswordHealthScore score={score} status={status} showScore={true} density={activeDensity} />
-          <PasswordStrengthIndicator score={score} />
-        </div>
+      {/* Common Breach Warning */}
+      {commonWarning && (
+        <Alert variant="error" icon={<AlertOctagon className="w-4 h-4 text-[var(--passguard-error,#ef4444)] shrink-0 mt-0.5" />}>
+          <AlertTitle className="text-xs font-semibold text-[var(--passguard-error,#ef4444)] mb-0.5">
+            Common Password Flagged
+          </AlertTitle>
+          <AlertDescription className="text-xs text-[var(--passguard-fg-muted,#94a3b8)]">
+            {commonWarning}
+          </AlertDescription>
+        </Alert>
+      )}
 
-        {/* Molecule 4: RequirementChecklist */}
-        <RequirementChecklist rules={rules} density={activeDensity} />
+      {/* Molecule 5: SuggestionCard */}
+      {suggestion && (
+        <SuggestionCard
+          title="Smart Suggestion"
+          description={suggestion}
+          expectedScore={expectedScoreBoost}
+          density={activeDensity}
+        />
+      )}
 
-        {/* Success Banner if 100% score */}
-        {successMessage && (
-          <Alert variant="success" icon={<CheckCircle2 className="w-4 h-4 text-[var(--passguard-success,#10b981)] shrink-0 mt-0.5" />}>
-            <AlertTitle className="text-xs font-semibold text-[var(--passguard-success,#10b981)] mb-0.5">
-              Security Standard Met
-            </AlertTitle>
-            <AlertDescription className="text-xs text-[var(--passguard-fg-muted,#94a3b8)]">
-              {successMessage}
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {/* Common Breach Warning */}
-        {commonWarning && (
-          <Alert variant="error" icon={<AlertOctagon className="w-4 h-4 text-[var(--passguard-error,#ef4444)] shrink-0 mt-0.5" />}>
-            <AlertTitle className="text-xs font-semibold text-[var(--passguard-error,#ef4444)] mb-0.5">
-              Common Password Flagged
-            </AlertTitle>
-            <AlertDescription className="text-xs text-[var(--passguard-fg-muted,#94a3b8)]">
-              {commonWarning}
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {/* Molecule 5: SuggestionCard */}
-        {suggestion && (
-          <SuggestionCard
-            title="Smart Suggestion"
-            description={suggestion}
-            expectedScore={expectedScoreBoost}
-            density={activeDensity}
-          />
-        )}
-
-        {/* Molecule 6: ReuseWarning */}
-        {reuseWarning && (
-          <ReuseWarning
-            isVisible={reuseWarning.isVisible}
-            message={reuseWarning.message}
-            density={activeDensity}
-          />
-        )}
-      </CardContent>
-
-      <Divider className={isMinimal ? 'my-0.5' : isCompact ? 'my-1' : 'my-1.5 sm:my-2'} />
+      {/* Molecule 6: ReuseWarning */}
+      {reuseWarning && (
+        <ReuseWarning
+          isVisible={reuseWarning.isVisible}
+          message={reuseWarning.message}
+          density={activeDensity}
+        />
+      )}
 
       {/* Primary Action Button */}
-      <CardFooter className="px-0 pb-0 pt-1 sm:pt-2">
-        <Button
-          variant="default"
-          size={isCompact ? 'md' : 'lg'}
-          className={cn(
-            'w-full font-semibold shadow-md gap-2 active:scale-[0.98] transition-transform',
-            isMinimal ? 'h-9 text-xs' : isCompact ? 'h-10 text-sm' : 'h-11 sm:h-12 text-sm sm:text-base'
-          )}
-          onClick={() => onContinue?.(analysis)}
-          rightIcon={<ArrowRight className="w-4 h-4" />}
-        >
-          Continue
-        </Button>
-      </CardFooter>
-    </Card>
+      {(onContinue || showContinueButton) && (
+        <div className="pt-1 sm:pt-2">
+          <Button
+            variant="default"
+            size={isCompact ? 'md' : 'lg'}
+            className={cn(
+              'w-full font-semibold shadow-md gap-2 active:scale-[0.98] transition-transform',
+              isMinimal ? 'h-9 text-xs' : isCompact ? 'h-10 text-sm' : 'h-11 sm:h-12 text-sm sm:text-base'
+            )}
+            onClick={() => onContinue?.(analysis)}
+            rightIcon={<ArrowRight className="w-4 h-4" />}
+          >
+            Continue
+          </Button>
+        </div>
+      )}
+    </div>
   );
 });
+PasswordSecurityCard.displayName = 'PasswordSecurityCard';
 PasswordSecurityCard.displayName = 'PasswordSecurityCard';

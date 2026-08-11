@@ -33,13 +33,13 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
               : 'border-[var(--passguard-border,#334155)] focus-visible:border-[var(--passguard-focus,#3b82f6)] focus-visible:ring-[var(--passguard-focus,#3b82f6)]',
             disabled && 'cursor-not-allowed opacity-50 bg-[var(--passguard-surface,#1e293b)]',
             startIcon && 'pl-9',
-            endIcon && 'pr-9',
+            endIcon && 'pr-10',
             className
           )}
           {...props}
         />
         {endIcon && (
-          <div className="absolute right-3 flex items-center text-[var(--passguard-fg-muted,#94a3b8)]">
+          <div className="absolute right-1 flex items-center justify-center text-[var(--passguard-fg-muted,#94a3b8)]">
             {endIcon}
           </div>
         )}

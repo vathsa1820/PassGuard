@@ -14,8 +14,8 @@ describe('Phase 4 — Density & Embedded UI Integration Tests', () => {
     const rootCard = container.querySelector('[data-passguard]');
     expect(rootCard).toHaveAttribute('data-passguard-density', 'compact');
     expect(screen.getByText('Password Security')).toBeInTheDocument();
-    // Shield icon container is hidden in compact/minimal headers
-    expect(container.querySelector('.lucide-shield-check')).not.toBeInTheDocument();
+    // Header shield icon is hidden in compact/minimal headers
+    expect(container.querySelector('.passguard-header-icon')).not.toBeInTheDocument();
   });
 
   it('renders compact header without icon in 280px-339px containers', () => {
@@ -26,8 +26,8 @@ describe('Phase 4 — Density & Embedded UI Integration Tests', () => {
     );
 
     expect(screen.getByText('Password Security')).toBeInTheDocument();
-    expect(container.querySelector('.lucide-shield-check')).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /view details/i })).toBeInTheDocument();
+    expect(container.querySelector('.passguard-header-icon')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /show details|view details/i })).toBeInTheDocument();
   });
 
   it('renders standard header with icon in 340px-600px containers', () => {
@@ -38,7 +38,7 @@ describe('Phase 4 — Density & Embedded UI Integration Tests', () => {
     );
 
     expect(screen.getByText('Password Security')).toBeInTheDocument();
-    expect(container.querySelector('.lucide-shield-check')).toBeInTheDocument();
+    expect(container.querySelector('.passguard-header-icon')).toBeInTheDocument();
   });
 
   it('renders detailed layout in 700px+ containers', () => {
@@ -50,13 +50,13 @@ describe('Phase 4 — Density & Embedded UI Integration Tests', () => {
 
     const rootCard = container.querySelector('[data-passguard]');
     expect(rootCard).toHaveAttribute('data-passguard-density', 'detailed');
-    expect(screen.queryByRole('button', { name: /view details/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /show details|view details/i })).not.toBeInTheDocument();
   });
 
   it('allows expanding and collapsing requirement details in compact mode', () => {
     render(<PasswordSecurityCard density="compact" value="Pass1!" />);
 
-    const toggleButton = screen.getByRole('button', { name: /view details/i });
+    const toggleButton = screen.getByRole('button', { name: /show details|view details/i });
     expect(toggleButton).toHaveAttribute('aria-expanded', 'false');
 
     // Expand
@@ -67,7 +67,7 @@ describe('Phase 4 — Density & Embedded UI Integration Tests', () => {
     // Collapse
     fireEvent.click(toggleButton);
     expect(toggleButton).toHaveAttribute('aria-expanded', 'false');
-    expect(screen.getByText('View details')).toBeInTheDocument();
+    expect(screen.getByText(/show details|view details/i)).toBeInTheDocument();
   });
 
   it('adapts cleanly to Host Application A (Modern SaaS #7C3AED)', () => {

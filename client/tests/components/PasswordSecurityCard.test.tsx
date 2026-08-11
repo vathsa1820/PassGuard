@@ -34,7 +34,7 @@ describe('PasswordSecurityCard Full Component & Flow Tests', () => {
     expect(input).toBeInTheDocument();
     expect(input).toHaveAttribute('id', 'passguard-input');
 
-    expect(screen.getByText('Password Score')).toBeInTheDocument();
+    expect(screen.getAllByText('Password Score')[0]).toBeInTheDocument();
     expect(screen.getByRole('progressbar')).toBeInTheDocument();
     expect(screen.getByText('Requirements')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /continue/i })).toBeInTheDocument();
@@ -61,7 +61,7 @@ describe('PasswordSecurityCard Full Component & Flow Tests', () => {
 
       await waitFor(
         () => {
-          expect(screen.getByText(/Strong|Excellent/i)).toBeInTheDocument();
+          expect(screen.getAllByText(/Strong|Excellent/i)[0]).toBeInTheDocument();
         },
         { timeout: 2000 }
       );
