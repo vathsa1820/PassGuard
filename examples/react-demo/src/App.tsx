@@ -67,7 +67,7 @@ export default function App() {
   const [borderRadius, setBorderRadius] = useState('0.5rem');
 
   // Container width trigger state
-  const [containerWidth, setContainerWidth] = useState<number>(400);
+  const [containerWidth, setContainerWidth] = useState<number>(440);
   const [density, setDensity] = useState<AdaptiveDensity>('auto');
 
   // Diagnostics accordion

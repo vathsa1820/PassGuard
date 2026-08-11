@@ -199,10 +199,32 @@ export const PasswordSecurityCard: React.FC<PasswordSecurityCardProps> = React.m
       {/* Compact Score Status Row (28-32px total height, aligned horizontally with input) */}
       <div className="flex items-center justify-between min-h-[28px] h-7 sm:h-8 w-full px-0 select-none">
         <PasswordHealthScore score={score} status={status} showScore={true} density={activeDensity} />
+        {!isDetailed && (
+          <button
+            type="button"
+            aria-expanded={isDetailsExpanded}
+            aria-controls={checklistId}
+            onClick={() => setIsDetailsExpanded((prev) => !prev)}
+            className="inline-flex items-center gap-1 text-xs sm:text-[13px] font-medium text-[var(--passguard-accent,#3b82f6)] hover:underline focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--passguard-focus,#3b82f6)] rounded px-1 py-0.5 cursor-pointer"
+          >
+            <span>{isDetailsExpanded ? 'Hide details' : 'Show details'}</span>
+            {isDetailsExpanded ? (
+              <ChevronUp className="w-3.5 h-3.5 text-current shrink-0" aria-hidden="true" />
+            ) : (
+              <ChevronDown className="w-3.5 h-3.5 text-current shrink-0" aria-hidden="true" />
+            )}
+          </button>
+        )}
       </div>
 
       {/* Requirement Checklist (Expandable via details toggle) */}
-      <RequirementChecklist rules={rules} density={activeDensity} />
+      <RequirementChecklist
+        id={checklistId}
+        rules={rules}
+        density={activeDensity}
+        isExpanded={isDetailsExpanded}
+        showToggle={false}
+      />
 
       {/* Detailed Container Rich Security Telemetry (>600px width) */}
       {isDetailed && analysis && (

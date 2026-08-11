@@ -18,17 +18,23 @@ export interface RequirementRule {
 }
 
 export interface RequirementChecklistProps {
+  id?: string;
   rules: RequirementRule[];
   className?: string;
   density?: AdaptiveDensity;
   defaultExpanded?: boolean;
+  isExpanded?: boolean;
+  showToggle?: boolean;
 }
 
 export const RequirementChecklist: React.FC<RequirementChecklistProps> = ({
+  id,
   rules = [],
   className,
   density: explicitDensity,
   defaultExpanded = false,
+  isExpanded: controlledExpanded,
+  showToggle = true,
 }) => {
   const contextTheme = useAdaptiveThemeContext();
   const density = explicitDensity && explicitDensity !== 'auto'
@@ -36,8 +42,10 @@ export const RequirementChecklist: React.FC<RequirementChecklistProps> = ({
     : (contextTheme?.density || 'standard');
 
   const isDetailed = density === 'detailed';
-  const [isExpanded, setIsExpanded] = useState(defaultExpanded || isDetailed);
-  const listId = useId();
+  const [internalExpanded, setInternalExpanded] = useState(defaultExpanded || isDetailed);
+  const isExpanded = controlledExpanded !== undefined ? controlledExpanded : internalExpanded;
+  const generatedId = useId();
+  const listId = id || generatedId;
 
   const completedCount = rules.filter((r) => r.completed).length;
   const totalCount = rules.length;
@@ -45,7 +53,7 @@ export const RequirementChecklist: React.FC<RequirementChecklistProps> = ({
 
   return (
     <div className={cn('space-y-2 w-full', className)}>
-      {!isDetailed && (
+      {!isDetailed && showToggle && (
         <div className="flex items-center justify-between gap-2 text-xs sm:text-[13px] select-none">
           <div className="flex items-center gap-1.5 font-medium text-[var(--passguard-fg,#f8fafc)]">
             <span
@@ -67,12 +75,34 @@ export const RequirementChecklist: React.FC<RequirementChecklistProps> = ({
             type="button"
             aria-expanded={isExpanded}
             aria-controls={listId}
-            onClick={() => setIsExpanded((prev) => !prev)}
+            onClick={() => {
+              if (controlledExpanded === undefined) {
+                setInternalExpanded((prev) => !prev);
+              }
+            }}
             className="inline-flex items-center gap-1 text-xs font-medium text-[var(--passguard-accent,#3b82f6)] hover:underline focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--passguard-focus,#3b82f6)] rounded px-1 py-0.5 cursor-pointer"
           >
             <span>{isExpanded ? 'Hide details' : 'Show details'}</span>
             {isExpanded ? <ChevronUp className="w-3.5 h-3.5" aria-hidden="true" /> : <ChevronDown className="w-3.5 h-3.5" aria-hidden="true" />}
           </button>
+        </div>
+      )}
+
+      {!isDetailed && !showToggle && (
+        <div className={cn('flex items-center gap-1.5 font-medium text-[var(--passguard-fg,#f8fafc)] text-xs sm:text-[13px] select-none pt-1', !isExpanded && 'sr-only')}>
+          <span
+            className={cn(
+              'w-4 h-4 rounded-full flex items-center justify-center shrink-0 text-[10px] transition-colors',
+              isAllCompleted
+                ? 'bg-[var(--passguard-success,#10b981)]/20 text-[var(--passguard-success,#10b981)] border border-[var(--passguard-success,#10b981)]/40'
+                : 'bg-[var(--passguard-surface-hover,#334155)] text-[var(--passguard-fg-muted,#94a3b8)] border border-[var(--passguard-border,#334155)]'
+            )}
+            aria-hidden="true"
+          >
+            {isAllCompleted ? <Check className="w-2.5 h-2.5 stroke-[2.5]" /> : <span className="font-mono text-[9px]">{completedCount}</span>}
+          </span>
+          <span className="font-semibold text-xs sm:text-[13px] text-[var(--passguard-fg,#f8fafc)]">Requirements</span>
+          <span className="text-[var(--passguard-fg-muted,#94a3b8)] font-normal">({completedCount}/{totalCount} met)</span>
         </div>
       )}
 
