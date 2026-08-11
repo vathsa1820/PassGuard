@@ -10,6 +10,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ---
 
+## [1.1.1] - 2026-08-11
+
+### Fixed
+- **External Consumer CSS Packaging**: Configured Tailwind CSS / PostCSS build pipeline to ensure compiled component utility styles (`flex`, `grid`, `space-y-*`, `gap-*`, `p-*`, `rounded-*`, `border`, `bg-*`, `text-*`, etc.) are processed and included directly in `dist/style.css` (increasing stylesheet size from 1.89 kB to 35.73 kB).
+- **Host Styling Isolation**: Set `preflight: false` in Tailwind configuration and introduced scoped `[data-passguard]` element resets for lists (`ul`/`ol`), inputs, buttons, and headings, guaranteeing zero style pollution of third-party host applications.
+- **Removed Unscoped Body Styling**: Removed global `body` selector from `theme.css` to preserve external consumer global layout defaults.
+
+### Security & Compatibility
+- **Zero Engine Changes**: No engine or security calculation logic was altered (`client/src/engine/**` remains 100% untouched).
+- **Zero Breaking API Changes**: All React components, props, hooks, types, and adaptive CSS variable APIs remain 100% backward compatible.
+
+---
+
 ## [1.1.0] - 2026-08-10
 
 ### Added

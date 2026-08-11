@@ -1,5 +1,22 @@
 # PassGuard Release Notes
 
+## PassGuard v1.1.1 Patch Release
+
+### WHAT CHANGED
+PassGuard `v1.1.1` fixes a critical CSS integration failure in external consumer applications:
+- **Tailwind Utility Extraction**: Integrated PostCSS and Tailwind CSS build pipeline to extract all component utility classes into `dist/style.css`.
+- **Stylesheet Size Increase**: `dist/style.css` size increased from ~1.89 kB to 35.73 kB (6.09 kB gzipped), providing self-contained styles without requiring host applications to install Tailwind CSS.
+- **Host Isolation & Scoped Resets**: Disabled Tailwind Preflight (`preflight: false`) and added scoped `[data-passguard]` element resets to prevent global CSS pollution in host applications.
+
+### WHY IT MATTERS
+External React applications installing `@vatza/passguard` and importing `@vatza/passguard/style.css` now render fully styled, pixel-perfect PassGuard components out-of-the-box, without requiring any build-time Tailwind or PostCSS configuration in the host project.
+
+### BACKWARD COMPATIBILITY & SECURITY
+- 100% backward compatible with `v1.1.0` and `v1.0.1`.
+- `client/src/engine/**` and security boundaries remain 100% untouched.
+
+---
+
 ## PassGuard v1.1.0 Minor Release
 
 ### WHAT CHANGED

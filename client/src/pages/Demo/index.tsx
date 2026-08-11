@@ -121,7 +121,7 @@ export const DemoPage: React.FC = () => {
             </div>
             <span className="font-bold text-lg text-white tracking-tight">PassGuard</span>
             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-950 text-emerald-400 border border-emerald-800/60">
-              v1.1.0 Adaptive UI
+              v1.1.1 Adaptive UI
             </span>
           </div>
 
