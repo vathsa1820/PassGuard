@@ -1,60 +1,63 @@
 # PassGuard
 
-Real-time, adaptive password security guidance for React.
+> Zero-knowledge real-time password security guidance for React applications.
 
 [![npm version](https://img.shields.io/npm/v/@vatza/passguard.svg)](https://www.npmjs.com/package/@vatza/passguard)
-[![GitHub release](https://img.shields.io/github/v/release/vathsa1820/PassGuard.svg)](https://github.com/vathsa1820/PassGuard/releases)
-[![CI Workflow](https://github.com/vathsa1820/PassGuard/actions/workflows/ci.yml/badge.svg)](https://github.com/vathsa1820/PassGuard/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-249%20passed-success.svg)](https://github.com/vathsa1820/PassGuard)
+[![React](https://img.shields.io/badge/React-18%20%7C%2019-blue.svg)](https://react.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org/)
+[![CI Workflow](https://github.com/vathsa1820/PassGuard/actions/workflows/ci.yml/badge.svg)](https://github.com/vathsa1820/PassGuard/actions/workflows/ci.yml)
+
+PassGuard is a React component library that provides real-time password security feedback directly inside forms.
+
+### Core Positioning
+
+- Client-side password analysis
+- Zero-knowledge architecture
+- No plaintext password transmission
+- Adaptive UI
+- Container-aware density
+- Progressive disclosure
+- Accessible React components
+- Self-contained CSS package
 
 ---
 
-[ **Live Demo** ](https://pass-guard-react-demo.vercel.app/) &nbsp;|&nbsp; [ **npm** ](https://www.npmjs.com/package/@vatza/passguard) &nbsp;|&nbsp; [ **GitHub** ](https://github.com/vathsa1820/PassGuard)
+## ✨ Features
+
+PassGuard decouples its core security engine from its visual presentation layer to deliver instant feedback with zero network latency.
+
+- **Real-Time Password Strength Analysis**: Dynamic evaluation of password quality as users type.
+- **Password Policy Validation**: Configurable rules for length, character sets, and complexity.
+- **Entropy Calculation**: Mathematical entropy measurement in bits.
+- **Pattern Detection**: Identification of sequential patterns (`1234`), repeated characters (`aaaa`), and spatial keyboard patterns (`qwerty`).
+- **Common-Password Detection**: Instant client-side lookup against common breached password lists.
+- **Password Reuse Detection**: Session-scoped history matching using local WebCrypto SHA-256 hashing.
+- **Password Health Score**: 0–100 numerical security score paired with clear status indicators.
+- **Requirement Checklist**: Real-time pass/fail feedback for individual policy rules.
+- **Compact Progressive Disclosure UI**: Collapsed requirements by default to preserve vertical form space.
+- **Adaptive Themes**: Inherits host application colors, light/dark modes, and CSS variables.
+- **Container-Aware Responsive Density**: Automatically adjusts visual density based on parent container width.
+- **Host Font Inheritance**: Adopts host application font families naturally.
+- **Accessibility Semantics**: Built with ARIA live regions, focus management, and keyboard accessibility.
+- **Zero External Network Requests**: All analysis executes locally in browser memory during evaluation.
+- **Self-Contained Production CSS**: Includes pre-compiled utility styles without external CSS build requirements.
 
 ---
 
-## Value Proposition
-
-### What PassGuard Is
-PassGuard is an open-source React component library and client-side password analysis engine designed for modern web applications.
-
-### Adaptive UI Experience
-PassGuard automatically adapts to your existing host application's UI:
-- **Zero-Config Theme Adaptation**: Dynamically inspects parent background, foreground, border-radius, and font-family via `--passguard-*` CSS tokens.
-- **Container-Aware Responsive Density**: Automatically switches density based on parent container width (`minimal` `<280px`, `compact` `280px–339px`, `standard` `340px–600px`, `detailed` `>600px`).
-- **Progressive Disclosure**: Compact requirement summaries (`Requirements (X/Y met)   View details →`) prevent vertical layout bloat in login & signup forms.
-
-### Why Client-Side Password Guidance Is Useful
-- **Immediate Feedback**: Users receive real-time updates as they type, helping them build strong passwords faster.
-- **Privacy & Safety**: Passwords are analyzed entirely within browser memory; raw passwords are never sent over the network to external validation services.
-- **Reduced Friction**: Live requirement indicators prevent post-submission form rejection.
-
----
-
-## Quick Start
-
-### 1. Installation
-
-Install `@vatza/passguard` via npm:
+## 📦 Installation
 
 ```bash
 npm install @vatza/passguard
 ```
 
-### 2. Import CSS Styles
-
-Import the component stylesheet in your entry file (`App.tsx` or `main.tsx`):
+Import the required CSS stylesheet in your entry file (`App.tsx` or `main.tsx`):
 
 ```tsx
 import '@vatza/passguard/style.css';
 ```
 
-### 3. Usage Examples
-
-#### Automatic Zero-Config Mode (`PasswordSecurityCard`)
-
-PassGuard automatically inherits your application's colors, background, and container density:
+### Usage Example
 
 ```tsx
 import React, { useState } from 'react';
@@ -65,7 +68,7 @@ export function SignupForm() {
   const [password, setPassword] = useState('');
 
   return (
-    <div style={{ maxWidth: '440px', margin: '2rem auto' }}>
+    <form onSubmit={(e) => e.preventDefault()} style={{ maxWidth: '400px', margin: '2rem auto' }}>
       <PasswordSecurityCard
         value={password}
         onChange={(val) => setPassword(val)}
@@ -73,139 +76,177 @@ export function SignupForm() {
           console.log('Password score:', analysis?.score);
         }}
       />
-    </div>
-  );
-}
-```
-
-#### Explicit Density Control (`density="compact"`)
-
-For tight form sidebars or embedded login modals, force compact density explicitly:
-
-```tsx
-import React from 'react';
-import { PasswordSecurityCard } from '@vatza/passguard';
-import '@vatza/passguard/style.css';
-
-export function EmbeddedSignup() {
-  return (
-    <PasswordSecurityCard density="compact" />
-  );
-}
-```
-
-#### Custom Headless Hook (`usePasswordAnalyzer`)
-
-```tsx
-import React from 'react';
-import { usePasswordAnalyzer, PasswordInput, RequirementChecklist } from '@vatza/passguard';
-import '@vatza/passguard/style.css';
-
-export function CustomSignup() {
-  const { password, setPassword, analysis } = usePasswordAnalyzer();
-
-  const rules = analysis.rules.map((r) => ({
-    label: r.label,
-    completed: r.passed,
-  }));
-
-  return (
-    <div className="space-y-4">
-      <PasswordInput
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        placeholder="Create password..."
-      />
-      <div>Score: {analysis.score} / 100 ({analysis.status})</div>
-      <RequirementChecklist rules={rules} />
-    </div>
+    </form>
   );
 }
 ```
 
 ---
 
-## Features
+## 🎨 Compact Password UX
 
-- **Adaptive Theme Engine**: Automatically adapts to host colors (`#7C3AED`, `#00D4FF`, `#123456`), light/dark modes, and CSS variables.
-- **Container-Aware Responsive Density**: Automatically adjusts layout for containers from `240px` up to `1000px+`.
-- **Progressive Requirement Disclosure**: Accessible collapsible checklist (`aria-expanded`, `aria-controls`) for compact forms.
-- **Real-time password analysis**: Instant key-by-keystroke feedback without latency or network overhead.
-- **Password strength scoring**: Multi-factor 0–100 numerical score categorized into clear status tiers (`Weak`, `Fair`, `Strong`, `Excellent`).
-- **Pattern detection**: Detection of repeated characters (`aaaa`), sequential character runs (`1234`), and keyboard spatial patterns (`qwerty`).
-- **Common-password detection**: In-memory lookup against common breached password lists.
-- **Password reuse warning**: Session-scoped SHA-256 hash comparison using WebCrypto API.
-- **Accessibility & Reduced Motion**: Full keyboard focus rings, WCAG contrast compliance, screen reader support, and `prefers-reduced-motion` safety.
+PassGuard v1.1.2 features a compact, password-first layout designed to fit cleanly inside signup and login forms:
 
----
+```text
+Password
+[ password input                         👁 ]
 
-## Architecture
+[ 4px strength indicator ]
 
-PassGuard decouples input analysis from visual rendering using a client-side execution pipeline:
-
-```
-React Application
-       ↓
-@vatza/passguard
-       ↓
-Local Password Analysis
-       ↓
-PasswordAnalysis
-       ↓
-UI Components
+✓ Strong · 84%                 Show details →
 ```
 
-Password evaluation occurs entirely client-side inside local browser memory. Raw passwords are never transmitted across the network, logged to storage, or sent to external servers.
+The requirement checklist remains collapsed by default and expands only when requested by the user (`Show details →`).
+
+Key UX elements:
+- **40px Input Field**: Standard, ergonomic height matching modern design systems.
+- **Integrated Visibility Control**: Built-in toggle to reveal or hide password text.
+- **Thin 4px Strength Indicator**: Non-intrusive progress bar positioned directly below the input.
+- **Compact Status Row**: High-contrast score and status display in a single inline line.
+- **Progressive Disclosure**: Keeps forms compact until the user seeks detailed feedback.
+- **Clean Typography**: Refined spacing and legible font weights.
+- **Container-Aware Density**: Micro-adjusts padding and font sizes dynamically.
 
 ---
 
-## Security & Operational Boundaries
+## 🧩 Components & Hooks
 
-PassGuard is designed specifically to provide **client-side password security guidance**.
+### UI Components
 
-### Operational Boundary
+| Component | Description |
+|---|---|
+| `PasswordSecurityCard` | All-in-one adaptive password card with automatic container density awareness. |
+| `PasswordInput` | Accessible password input field with visibility toggle and security styling. |
+| `PasswordHealthScore` | Compact score readout (0–100) and status badge (`Weak`, `Fair`, `Strong`, `Excellent`). |
+| `PasswordStrengthIndicator` | Thin progress bar visualizing numerical password strength. |
+| `RequirementChecklist` | Interactive checklist rendering requirement status with collapsible progressive disclosure. |
+| `SuggestionCard` | Guidance banner providing actionable tips to improve password strength. |
+| `ReuseWarning` | Alert banner flagging passwords previously entered in the local session. |
 
-PassGuard **does NOT replace**:
-- **Server-side password hashing**: Passwords must be hashed on the server using secure algorithms (such as `Argon2id` or `bcrypt`).
-- **Backend authentication**: Client-side analysis does not handle identity verification or login state.
-- **MFA / 2FA**: Multi-factor authentication remains essential for user account security.
-- **Rate limiting**: Server endpoints must retain IP rate-limiting and brute-force protection.
-- **Session security**: Backend session management, token handling, and storage security remain server responsibilities.
+### React Hooks
 
-For full details, read our [SECURITY.md](SECURITY.md).
-
----
-
-## Public Components & Hooks
-
-| Component / Hook | Type | Purpose |
-| :--- | :--- | :--- |
-| `PasswordSecurityCard` | Component | All-in-one adaptive card component with container density awareness (`auto`, `compact`, `standard`, `detailed`). |
-| `PasswordInput` | Component | Accessible password input field with visibility toggle and security styling. |
-| `PasswordHealthScore` | Component | Visual indicator showing numerical strength score (0–100) and status badge. |
-| `PasswordStrengthIndicator` | Component | Progress bar visualizing password strength levels. |
-| `RequirementChecklist` | Component | Interactive checklist rendering pass/fail states with summary count and progressive disclosure toggle. |
-| `SuggestionCard` | Component | Guidance card providing actionable advice to improve password quality. |
-| `ReuseWarning` | Component | Alert banner flagging passwords previously entered in the current local session. |
-| `usePasswordAnalyzer` | Hook | Headless React hook providing input state management and real-time analysis output. |
+| Hook | Description |
+|---|---|
+| `usePasswordAnalysis` | React hook providing real-time evaluation outputs for a given password string. |
+| `usePasswordAnalyzer` | Headless state management hook combining input handling and analysis output. |
+| `usePasswordStrength` | Lightweight hook returning numerical score and qualitative status. |
+| `useAdaptiveTheme` | Dynamic hook detecting parent container dimensions, host colors, and dark/light mode. |
 
 ---
 
-## Documentation Links
+## 🔐 Security & Privacy
 
-- [Getting Started](docs/getting-started.md)
-- [Installation](docs/installation.md)
-- [Usage](docs/usage.md)
-- [Configuration](docs/configuration.md)
-- [API Reference](docs/api-reference.md)
-- [Components](docs/components.md)
-- [Security](SECURITY.md)
-- [Contributing](CONTRIBUTING.md)
-- [Changelog](CHANGELOG.md)
-- [Release Notes](docs/RELEASE-NOTES.md)
+PassGuard is designed with a strict zero-knowledge privacy model:
+
+- **Local Browser Analysis**: All password analysis occurs locally in browser memory.
+- **No PassGuard Server**: PassGuard does not transmit passwords or telemetry to external servers.
+- **Zero External Network Requests**: No external API calls are made during password evaluation.
+- **No Plaintext Storage**: Plaintext passwords are not intentionally persisted in `localStorage` or `sessionStorage`.
+- **Local WebCrypto SHA-256 Hashing**: Password reuse detection hashes entries using browser WebCrypto APIs (`window.crypto.subtle`) locally.
+- **UI & Security Guidance Boundary**: PassGuard is a UI and security-guidance library and is **NOT** a replacement for server-side authentication controls.
+- **Server Responsibilities**: Applications must still hash passwords securely on the server (e.g., Argon2id/bcrypt) and transmit data over HTTPS.
+- **Breach Database Limit**: PassGuard does not guarantee that a password has never appeared in every breach database.
 
 ---
 
-## License
+## 🎨 Adaptive UI
+
+PassGuard automatically inherits visual styles from its parent container:
+
+- **Host Theme Inheritance**: Inherits parent background and text colors via custom CSS variables (`--passguard-*`).
+- **CSS Variables**: Easy override support for background, surface, accent, and focus ring colors.
+- **Light & Dark Themes**: Automatic luminance detection adapts text contrast seamlessly.
+- **Accent Customization**: Matches application brand primary colors automatically.
+- **Container-Aware Responsive Density**: Automatically selects visual density based on parent container width.
+- **Density Modes**: Minimal, Compact, Standard, and Detailed layouts.
+
+| Container Width | Density |
+|---|---|
+| `<280px` | Minimal |
+| `280–339px` | Compact |
+| `340–600px` | Standard |
+| `>600px` | Detailed |
+
+---
+
+## ♿ Accessibility
+
+PassGuard prioritizes accessible user experiences:
+
+- **Keyboard Navigation**: Complete keyboard focus support across all inputs and interactive buttons.
+- **Visible Focus States**: High-contrast focus rings for interactive elements.
+- **ARIA Semantics**: `aria-expanded` and `aria-controls` on disclosure controls.
+- **Live Announcements**: `aria-live` region updates score changes for screen readers.
+- **Progress Semantics**: Standard `role="progressbar"` attributes on strength meters.
+- **Automated Validation**: Verified via automated `axe-core` accessibility audit suites.
+
+*Note: PassGuard is engineered following accessibility best practices, but does not claim formal WCAG certification.*
+
+---
+
+## 🧪 Testing & Quality Assurance
+
+PassGuard v1.1.2 release verification results:
+
+- **35 test files** passed
+- **249 tests** passing
+- Security audit passing
+- TypeScript/lint passing
+- Production build passing
+- npm package dry-run passing
+
+---
+
+## 🌐 Live Demo
+
+Try PassGuard in your browser:
+
+[**https://pass-guard-six.vercel.app/**](https://pass-guard-six.vercel.app/)
+
+Interactive public demo showing PassGuard integrated into a realistic signup form.
+
+---
+
+## 📦 Package Information
+
+- **npm**: [`@vatza/passguard`](https://www.npmjs.com/package/@vatza/passguard)
+- **Current Version**: `@vatza/passguard@1.1.2`
+
+---
+
+## 👨‍💻 Developer
+
+**Shrivathsa T**<br />
+GitHub: [@vathsa1820](https://github.com/vathsa1820)
+
+---
+
+## 📄 License
 
 This project is licensed under the [MIT License](LICENSE).
+
+---
+
+## 🗺️ Roadmap
+
+Future planned directions:
+- Additional framework integration examples (Vue, Svelte, Next.js)
+- Expanded theme customization presets
+- Additional password policy presets
+- Richer developer diagnostics and telemetry hooks
+- Improved developer documentation and guides
+
+*Note: The roadmap items above represent future ideas and are not currently implemented features.*
+
+---
+
+## ⭐ Why PassGuard?
+
+Traditional password fields provide weak feedback while large password-security dashboards disrupt form UX. PassGuard aims to put security guidance directly beside the password field while remaining compact, adaptive, accessible, and privacy-preserving.
+
+---
+
+Built with React, TypeScript, Vite and Tailwind CSS.
+
+Developer: Shrivathsa T<br />
+GitHub: @vathsa1820
